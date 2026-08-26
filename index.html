@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Llamados - Hospital (Modo Local)</title>
+    <title>Sistema de Llamados - Hospital</title>
     <!-- Tailwind CSS para diseño moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts Inter -->
@@ -26,7 +26,9 @@
     </div>
 
     <script>
-        // Estado local de la aplicación
+        // Usamos BroadcastChannel y localStorage para sincronizar Celular y TV en tiempo real
+        const channel = new BroadcastChannel('hospital_llamados_channel');
+
         let state = {
             view: 'selector', // 'selector', 'operator', 'tv'
             currentCall: {
@@ -37,9 +39,8 @@
             history: []
         };
 
-        // Cargar estado guardado al iniciar
         function loadState() {
-            const savedState = localStorage.getItem('hospital_call_state_local');
+            const savedState = localStorage.getItem('hospital_call_state');
             if (savedState) {
                 try {
                     state = JSON.parse(savedState);
@@ -47,38 +48,48 @@
             }
         }
 
-        function saveState() {
-            localStorage.setItem('hospital_call_state_local', JSON.stringify(state));
+        function saveAndBroadcastState() {
+            localStorage.setItem('hospital_call_state', JSON.stringify(state));
+            channel.postMessage(state);
         }
+
+        channel.onmessage = (event) => {
+            state = event.data;
+            if (state.view === 'tv') {
+                renderTV();
+            } else if (state.view === 'operator') {
+                renderOperator();
+            }
+        };
 
         function renderSelector() {
             const app = document.getElementById('app');
-            app.className = "flex-1 flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950";
+            app.className = "flex-1 flex items-center justify-center p-4 md:p-6 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950";
             app.innerHTML = `
-                <div class="max-w-4xl w-full bg-slate-800/80 backdrop-blur-xl border border-slate-700 p-8 md:p-12 rounded-3xl shadow-2xl text-center">
+                <div class="max-w-4xl w-full bg-slate-800/80 backdrop-blur-xl border border-slate-700 p-6 md:p-12 rounded-3xl shadow-2xl text-center">
                     <div class="inline-flex items-center justify-center p-4 bg-blue-600/20 text-blue-400 rounded-2xl mb-6 shadow-inner">
                         <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                     </div>
-                    <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-4">Gestión de Turnos (Red Local / Bloc de Notas)</h1>
-                    <p class="text-slate-400 text-lg mb-10 max-w-xl mx-auto">Selecciona cómo funcionará este dispositivo para evitar bloqueos del Firewall.</p>
+                    <h1 class="text-2xl md:text-5xl font-black text-white tracking-tight mb-4">Sistema de Gestión de Turnos</h1>
+                    <p class="text-slate-400 text-sm md:text-lg mb-8 max-w-xl mx-auto">Selecciona cómo deseas usar este dispositivo en este momento.</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <button onclick="setMode('operator')" class="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white p-8 rounded-2xl shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-left flex flex-col justify-between border border-blue-400/30">
+                        <button onclick="setMode('operator')" class="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white p-6 md:p-8 rounded-2xl shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-left flex flex-col justify-between border border-blue-400/30">
                             <div>
-                                <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-4 text-2xl">📝</div>
-                                <h3 class="text-2xl font-bold mb-2">Panel Operador (PC / Bloc de notas)</h3>
-                                <p class="text-blue-100 text-sm opacity-90">Genera o carga el archivo <code class="bg-blue-900 px-1 rounded">llamado.txt</code> para actualizar las pantallas.</p>
+                                <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-4 text-2xl">📱</div>
+                                <h3 class="text-xl md:text-2xl font-bold mb-2">Control Remoto (Celular)</h3>
+                                <p class="text-blue-100 text-xs md:text-sm opacity-90">Ideal para llevar en el teléfono y dictar los turnos rápidamente.</p>
                             </div>
                             <div class="mt-6 flex items-center text-sm font-semibold text-blue-200 group-hover:translate-x-2 transition-transform">
-                                Abrir Panel Operador &rarr;
+                                Abrir Control Celular &rarr;
                             </div>
                         </button>
 
-                        <button onclick="setMode('tv')" class="group relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white p-8 rounded-2xl shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-left flex flex-col justify-between border border-emerald-400/30">
+                        <button onclick="setMode('tv')" class="group relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white p-6 md:p-8 rounded-2xl shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-left flex flex-col justify-between border border-emerald-400/30">
                             <div>
                                 <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-4 text-2xl">📺</div>
-                                <h3 class="text-2xl font-bold mb-2">Pantalla Sala de Espera (Google TV)</h3>
-                                <p class="text-emerald-100 text-sm opacity-90">Muestra en grande los turnos y lee automáticamente los archivos de texto actualizados.</p>
+                                <h3 class="text-xl md:text-2xl font-bold mb-2">Pantalla de Sala (TV / Monitor)</h3>
+                                <p class="text-emerald-100 text-xs md:text-sm opacity-90">Para la pantalla gigante en la sala de espera. Muestra turnos y emite sonidos.</p>
                             </div>
                             <div class="mt-6 flex items-center text-sm font-semibold text-emerald-200 group-hover:translate-x-2 transition-transform">
                                 Iniciar Pantalla TV &rarr;
@@ -91,122 +102,135 @@
 
         function setMode(mode) {
             state.view = mode;
-            saveState();
+            saveAndBroadcastState();
             if (mode === 'operator') renderOperator();
             else renderTV();
         }
 
+        let currentSelectedDestination = 'Área: Selección de Pacientes';
+
         function renderOperator() {
             const app = document.getElementById('app');
-            app.className = "flex-1 flex flex-col bg-slate-900 p-6 max-w-4xl mx-auto w-full";
+            app.className = "flex-1 flex flex-col bg-slate-900 p-3 md:p-6 max-w-2xl mx-auto w-full";
+            
+            let consultoriosOptions = `<option value="Área: Selección de Pacientes" ${currentSelectedDestination === 'Área: Selección de Pacientes' ? 'selected' : ''}>📋 Área: Selección de Pacientes</option>`;
+            for(let i = 1; i <= 12; i++) {
+                const name = `Consultorio ${i < 10 ? '0'+i : i}`;
+                consultoriosOptions += `<option value="${name}" ${currentSelectedDestination === name ? 'selected' : ''}>🚪 ${name}</option>`;
+            }
+
             app.innerHTML = `
-                <header class="flex justify-between items-center bg-slate-800 border border-slate-700 px-6 py-4 rounded-2xl shadow-lg mb-6">
-                    <div class="flex items-center space-x-3">
-                        <span class="text-3xl">📝</span>
+                <!-- Cabecera del Control Celular -->
+                <header class="flex justify-between items-center bg-slate-800 border border-slate-700 px-4 py-3 rounded-2xl shadow-lg mb-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-2xl">📱</span>
                         <div>
-                            <h2 class="text-xl font-bold text-white">Panel Operador con Bloc de Notas</h2>
-                            <p class="text-xs text-slate-400">Actualiza las pantallas de la sala sin salir a internet</p>
+                            <h2 class="text-base font-bold text-white">Control Remoto</h2>
+                            <p class="text-[10px] text-emerald-400 font-medium">● Sincronizado</p>
                         </div>
                     </div>
-                    <button onclick="setMode('selector')" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-sm font-semibold transition-colors">
-                        Menú Principal
+                    <button onclick="setMode('selector')" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-xs font-semibold">
+                        Menú
                     </button>
                 </header>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
-                    <!-- Generar Turno y Archivo -->
-                    <div class="bg-slate-800/90 border border-slate-700 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
+                <!-- Panel Principal de Control Móvil -->
+                <div class="space-y-4 flex-1 flex flex-col justify-between">
+                    <div class="bg-slate-800/90 border border-slate-700 p-4 md:p-6 rounded-2xl shadow-xl space-y-4">
                         <div>
-                            <h3 class="text-lg font-bold text-white mb-4">1. Generar Turno para Bloc de Notas</h3>
-                            
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-slate-400 mb-2">Número de Turno / Paciente</label>
-                                <input type="text" id="txtTicket" placeholder="Ej. A-015" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-lg font-bold uppercase focus:outline-none focus:border-blue-500">
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-slate-400 mb-2">Destino / Consultorio</label>
-                                <select id="txtLocation" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:outline-none focus:border-blue-500">
-                                    <option value="Área: Selección de Pacientes">📋 Área: Selección de Pacientes</option>
-                                    ${Array.from({length: 12}, (_, i) => `<option value="Consultorio ${i+1 < 10 ? '0'+(i+1) : i+1}">🚪 Consultorio ${i+1 < 10 ? '0'+(i+1) : i+1}</option>`).join('')}
-                                </select>
-                            </div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">1. Número de Turno / Paciente</label>
+                            <input type="text" id="ticketInput" placeholder="Ej. A-012" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-xl font-black uppercase focus:outline-none focus:border-blue-500 tracking-wider">
                         </div>
 
-                        <button onclick="downloadCallFile()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center justify-center space-x-2 text-base">
-                            <span>📥 Descargar Archivo (llamado.txt)</span>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">2. Destino / Consultorio</label>
+                            <select id="mobileDestSelect" onchange="currentSelectedDestination = this.value" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white font-bold text-base focus:outline-none focus:border-blue-500">
+                                ${consultoriosOptions}
+                            </select>
+                        </div>
+
+                        <button onclick="callCurrent()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black py-4 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center justify-center space-x-2 text-lg">
+                            <span>📢 LLAMAR TURNO AHORA</span>
                         </button>
                     </div>
 
-                    <!-- Cargar Archivo en el TV / Pantalla -->
-                    <div class="bg-slate-800/90 border border-slate-700 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
-                        <div>
-                            <h3 class="text-lg font-bold text-white mb-4">2. Actualizar en los Televisores</h3>
-                            <p class="text-xs text-slate-400 mb-4">En los Google TV, abre esta misma página en el navegador, selecciona <strong class="text-white">Pantalla Sala de Espera</strong>, y arrastra o selecciona el archivo <code class="text-blue-300">llamado.txt</code> que creaste para que suene la campana y se actualice al instante.</p>
-
-                            <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-xl mb-4">
-                                <span class="text-xs text-slate-400 block mb-1">Turno Actual en Memoria:</span>
-                                <div class="text-2xl font-black text-white">${state.currentCall.ticket}</div>
-                                <div class="text-sm text-emerald-400 font-semibold">${state.currentCall.location}</div>
-                            </div>
+                    <!-- Turno actual en curso visto desde el celular -->
+                    <div class="bg-slate-800/60 border border-slate-700/80 p-4 rounded-2xl">
+                        <span class="text-xs text-slate-400 block mb-1">Último turno enviado:</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-2xl font-black text-white" id="activeTicketDisplay">${state.currentCall.ticket}</span>
+                            <span class="text-xs bg-blue-600/30 text-blue-300 px-3 py-1 rounded-lg font-semibold" id="activeLocationDisplay">${state.currentCall.location}</span>
                         </div>
-
-                        <button onclick="setMode('tv')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all">
-                            📺 Ver Pantalla de Televisor Ahora
-                        </button>
                     </div>
                 </div>
             `;
         }
 
-        function downloadCallFile() {
-            const ticket = document.getElementById('txtTicket').value.trim().toUpperCase();
-            const location = document.getElementById('txtLocation').value;
-            if (!ticket) {
-                alertBox("Ingrese el número de turno");
+        function callCurrent() {
+            const ticketInput = document.getElementById('ticketInput');
+            const ticketVal = ticketInput.value.trim();
+
+            if (!ticketVal) {
+                showNotification("Ingrese el número de turno", "error");
                 return;
             }
 
-            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
             state.history.unshift(state.currentCall);
             if (state.history.length > 4) state.history.pop();
-            state.currentCall = { ticket, location, time: now };
-            saveState();
 
-            // Crear y descargar archivo llamado.txt para el bloc de notas
-            const fileContent = `TURNO: ${ticket}\nDESTINO: ${location}\nHORA: ${now}`;
-            const blob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = "llamado.txt";
-            a.click();
+            state.currentCall = {
+                ticket: ticketVal.toUpperCase(),
+                location: currentSelectedDestination,
+                time: timeString
+            };
 
-            alertBox(`Turno ${ticket} guardado en llamado.txt con éxito`);
-            document.getElementById('txtTicket').value = '';
+            saveAndBroadcastState();
+            showNotification(`¡Turno ${ticketVal.toUpperCase()} enviado con éxito!`, "success");
+            
+            ticketInput.value = '';
+            ticketInput.focus();
+            
+            const activeT = document.getElementById('activeTicketDisplay');
+            const activeL = document.getElementById('activeLocationDisplay');
+            if(activeT) activeT.innerText = state.currentCall.ticket;
+            if(activeL) activeL.innerText = state.currentCall.location;
         }
 
         function renderTV() {
             const app = document.getElementById('app');
             app.className = "flex-1 flex flex-col bg-slate-950 text-white p-6 justify-between overflow-hidden";
+            
+            const validHistory = state.history.filter(h => h.ticket && h.ticket !== '---');
+            let historyHTML = '';
+            if (validHistory.length === 0) {
+                historyHTML = `<div class="text-slate-500 text-sm italic col-span-3 text-center py-2">Sin llamados previos registrados en la sesión actual.</div>`;
+            } else {
+                historyHTML = validHistory.slice(0, 3).map(item => `
+                    <div class="bg-slate-800/90 border border-slate-700/60 rounded-xl p-3 flex justify-between items-center">
+                        <div>
+                            <div class="text-xl font-black text-white">${item.ticket}</div>
+                            <div class="text-xs text-slate-400 truncate max-w-[180px]">${item.location}</div>
+                        </div>
+                        <div class="text-xs text-slate-500 font-mono">${item.time}</div>
+                    </div>
+                `).join('');
+            }
+
             app.innerHTML = `
                 <header class="flex justify-between items-center border-b border-slate-800 pb-4">
                     <div class="flex items-center space-x-4">
                         <div class="bg-blue-600 text-white font-black px-4 py-2 rounded-xl text-xl shadow-lg">HMQ</div>
                         <div>
                             <h1 class="text-2xl font-bold tracking-tight">Sala de Espera - Consultorios Médicos</h1>
-                            <p class="text-slate-400 text-sm">Carga tu archivo <code class="text-blue-300">llamado.txt</code> aquí para actualizar los turnos</p>
+                            <p class="text-slate-400 text-sm">Por favor manténgase atento a su turno</p>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <label class="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg transition-all flex items-center space-x-2">
-                            <span>📂 Cargar llamado.txt</span>
-                            <input type="file" accept=".txt" onchange="handleTVFileLoad(event)" class="hidden">
-                        </label>
-                        <div class="text-right">
-                            <div id="tvClock" class="text-2xl font-black text-blue-400">00:00:00</div>
-                            <button onclick="setMode('selector')" class="text-[10px] text-slate-500 hover:text-slate-300">Menú</button>
-                        </div>
+                    <div class="text-right">
+                        <div id="tvClock" class="text-3xl font-black text-blue-400">00:00:00</div>
+                        <button onclick="setMode('selector')" class="text-xs text-slate-500 hover:text-slate-300 mt-1">Configuración / Salir</button>
                     </div>
                 </header>
 
@@ -233,48 +257,11 @@
                         Últimos Llamados Recientes
                     </h3>
                     <div id="tvHistoryList" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        ${state.history.filter(h => h.ticket && h.ticket !== '---').length === 0 ? 
-                            `<div class="text-slate-500 text-sm italic col-span-3 text-center py-2">Sin llamados previos cargados. Sube tu archivo .txt</div>` :
-                            state.history.filter(h => h.ticket && h.ticket !== '---').slice(0, 3).map(item => `
-                                <div class="bg-slate-800/90 border border-slate-700/60 rounded-xl p-3 flex justify-between items-center">
-                                    <div>
-                                        <div class="text-xl font-black text-white">${item.ticket}</div>
-                                        <div class="text-xs text-slate-400 truncate max-w-[180px]">${item.location}</div>
-                                    </div>
-                                    <div class="text-xs text-slate-500 font-mono">${item.time}</div>
-                                </div>
-                            `).join('')
-                        }
+                        ${historyHTML}
                     </div>
                 </footer>
             `;
             startClock();
-        }
-
-        function handleTVFileLoad(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = e.target.result;
-                let ticket = "TURNO";
-                let location = "Consultorio";
-
-                const lines = text.split('\n');
-                lines.forEach(line => {
-                    if (line.toLowerCase().includes('turno')) ticket = line.split(':')[1]?.trim().toUpperCase() || ticket;
-                    if (line.toLowerCase().includes('destino')) location = line.split(':')[1]?.trim() || location;
-                });
-
-                const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                state.history.unshift(state.currentCall);
-                if (state.history.length > 4) state.history.pop();
-                state.currentCall = { ticket, location, time: now };
-                saveState();
-                playChime();
-                renderTV();
-            };
-            reader.readAsText(file);
         }
 
         function startClock() {
@@ -287,12 +274,18 @@
             }, 1000);
         }
 
-        function alertBox(msg) {
-            const box = document.createElement('div');
-            box.className = "fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-3 rounded-xl shadow-2xl font-bold z-50 transition-all";
-            box.innerText = msg;
-            document.body.appendChild(box);
-            setTimeout(() => box.remove(), 3000);
+        function showNotification(message, type) {
+            playChime();
+            const notif = document.createElement('div');
+            notif.className = `fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-white font-bold flex items-center space-x-3 transition-all transform translate-y-10 opacity-0 ${type === 'error' ? 'bg-rose-600' : 'bg-emerald-600'}`;
+            notif.innerHTML = `<span>${type === 'error' ? '⚠️' : '✅'}</span><span>${message}</span>`;
+            document.body.appendChild(notif);
+
+            setTimeout(() => { notif.classList.remove('translate-y-10', 'opacity-0'); }, 50);
+            setTimeout(() => {
+                notif.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
         }
 
         function playChime() {
@@ -316,11 +309,23 @@
             } catch(e) {}
         }
 
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'hospital_call_state') {
+                loadState();
+                if (state.view === 'tv') renderTV();
+                else if (state.view === 'operator' && document.getElementById('ticketInput') === null) renderOperator();
+            }
+        });
+
         window.onload = function() {
             loadState();
-            if (state.view === 'operator') renderOperator();
-            else if (state.view === 'tv') renderTV();
-            else renderSelector();
+            if (state.view === 'operator') {
+                renderOperator();
+            } else if (state.view === 'tv') {
+                renderTV();
+            } else {
+                renderSelector();
+            }
         }
     </script>
 </body>
