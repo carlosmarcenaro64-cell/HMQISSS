@@ -20,13 +20,10 @@
     <div id="app" class="flex-1 flex flex-col"></div>
 
     <script>
-        // URL de tu aplicación web de Google Apps Script configurada
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycblzar7aNPOpi7ym0DzigrnFxloogmUuhLqzivAYQXJJSnJLWa4JGDnLYZ3xMbSjbyw/exec';
 
         let state = {
-            view: 'selector',
-            currentCall: { ticket: '---', name: '', location: 'Seleccione un destino', time: '--:--' },
-            history: []
+            view: 'selector'
         };
 
         let currentSelectedDestination = 'Consultorio 01';
@@ -171,7 +168,7 @@
             `;
             startClock();
             pollSheetData();
-            setInterval(pollSheetData, 3000); // Revisa la hoja cada 3 segundos
+            setInterval(pollSheetData, 3000);
         }
 
         let lastCheckedTicket = '';
@@ -184,8 +181,10 @@
                 document.getElementById('tvCurrentName').innerText = data.name || '';
                 document.getElementById('tvCurrentLocation').innerText = data.location;
 
-                if (data.ticket !== '---' && data.ticket !== lastCheckedTicket) {
-                    lastCheckedTicket = data.ticket;
+                // Si hay un turno nuevo registrado en la hoja, emite la voz
+                const uniqueKey = data.ticket + "-" + data.time;
+                if (data.ticket !== '---' && uniqueKey !== lastCheckedTicket) {
+                    lastCheckedTicket = uniqueKey;
                     speakCall(data.ticket, data.name, data.location);
                 }
             } catch(e) {}
