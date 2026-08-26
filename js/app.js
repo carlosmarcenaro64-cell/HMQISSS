@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMsg = document.getElementById('error-msg');
     const logoutBtn = document.getElementById('logout-btn');
 
-    // Verificar si ya existe una sesión activa al cargar la página (F5)
+    // Verificar si ya existe una sesión activa al cargar o refrescar (F5)
     const sesionActiva = localStorage.getItem('hmq_sesion_activa');
 
     if (sesionActiva === 'true') {
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const pass = document.getElementById('password').value.trim();
 
             if (user === USER_VALIDO && pass === PASS_VALIDO) {
-                // Guardar estado en el navegador
+                // Guardar la sesión persistentemente
                 localStorage.setItem('hmq_sesion_activa', 'true');
 
                 errorMsg.style.display = 'none';
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            // Eliminar estado del navegador al presionar Salir
+            // Eliminar la sesión guardada
             localStorage.removeItem('hmq_sesion_activa');
 
             dashboardSection.classList.add('hidden');
@@ -53,9 +53,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function navegar(modulo) {
-    if (modulo === 'Constancias de Permanencia') {
-        window.location.href = './constancias-permanencia/';
+    const enlaces = {
+        'Constancias de Permanencia': './constancias-permanencia/',
+        'Web Impacto': 'http://salud/WDH/Login.aspx?ReturnUrl=%2fWDH%2fConsulta_DerechoXdoc.aspx',
+        'Domiciliar': 'https://adminapp.isss.gob.sv/SMServicios/Reportes_Inscripciones.aspx',
+        'Agenda Médica': 'http://salud/agendamedica/historicocitas.aspx',
+        'Pantallas': 'https://app.isss.gob.sv/isss/r/app/tokentv/libera-tvs?clear=8&session=10082393612119&cs=3UgFtMKy5osP1mKh9KodsuK-b15nwzZV6RWSufO9GsKV2RMzu2Baixe5P-gFepeOVbhQzGxrAlQjRX999hzuxjg'
+    };
+
+    if (enlaces[modulo]) {
+        // Los enlaces externos se abren en una nueva pestaña para mantener el portal abierto
+        if (enlaces[modulo].startsWith('http')) {
+            window.open(enlaces[modulo], '_blank');
+        } else {
+            window.location.href = enlaces[modulo];
+        }
     } else {
-        alert(`Accediendo al módulo: ${modulo}`);
+        alert(`Módulo ${modulo} en proceso de configuración.`);
     }
 }
