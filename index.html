@@ -3,345 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lissette Alexandra: Un Retrato de lo Extraordinario</title>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <title>Portal Policlínico - ISSS</title>
     <style>
-        :root {
-            --bg-body: #f4f1ea;
-            --paper: #fdfaf0;
-            --text: #2c2c2c;
-            --accent: #962d2d;
-            --gold: #b08d57;
-            --shadow: rgba(0,0,0,0.1);
-        }
-
-        body.dark-mode {
-            --bg-body: #121212;
-            --paper: #1e1e1e;
-            --text: #d4d4d4;
-            --accent: #ff6b6b;
-            --shadow: rgba(0,0,0,0.5);
-        }
-
-        body {
-            background-color: var(--bg-body);
-            color: var(--text);
-            font-family: 'Lora', serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            transition: 0.5s;
-            overflow-x: hidden;
-        }
-
-        /* Pantalla de Bloqueo */
-        #lock-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-body);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: opacity 1s ease, visibility 1s;
-        }
-
-        .lock-box {
-            text-align: center;
-            padding: 40px;
-            max-width: 350px;
-            background: var(--paper);
-            box-shadow: 0 10px 30px var(--shadow);
-            border-radius: 8px;
-            border: 1px solid var(--gold);
-        }
-
-        .lock-box h2 { font-family: 'Dancing Script', cursive; font-size: 2.2rem; margin-bottom: 20px; color: var(--accent); }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         
-        .welcome-text {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            color: var(--text);
-            font-style: italic;
-        }
-
-        .lock-box input {
-            padding: 12px;
-            width: 220px;
-            border: 1px solid var(--gold);
-            background: var(--paper);
-            color: var(--text);
-            border-radius: 4px;
-            text-align: center;
-            font-size: 1rem;
-            margin-bottom: 15px;
-            outline: none;
-        }
-
-        .lock-box button {
-            display: block;
-            margin: 0 auto;
-            padding: 10px 30px;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: 'Playfair Display', serif;
-        }
-
-        /* Contenedor del Libro */
-        .book-container {
-            width: 95%;
-            max-width: 850px;
-            margin: 50px 0;
-            background: var(--paper);
-            min-height: 80vh;
-            box-shadow: 0 10px 30px var(--shadow);
-            border-radius: 5px;
-            position: relative;
-            padding: 60px;
-            box-sizing: border-box;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .page { display: none; animation: fadeIn 0.8s ease-in-out; }
-        .page.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h1 { font-family: 'Dancing Script', cursive; color: var(--accent); font-size: 3rem; text-align: center; margin-bottom: 10px; }
-        .subtitle { font-family: 'Playfair Display', serif; text-align: center; letter-spacing: 2px; font-size: 1rem; margin-bottom: 40px; color: var(--gold); }
-        h2 { font-family: 'Playfair Display', serif; color: var(--accent); border-bottom: 1px solid var(--gold); padding-bottom: 10px; margin-bottom: 30px; text-align: center; }
-        p { line-height: 1.8; text-align: justify; white-space: pre-line; margin-bottom: 20px; font-size: 1.1rem; }
+        .card { background: white; padding: 2.5rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { color: #003366; margin-bottom: 1.5rem; text-align: center; }
         
-        .index-list { list-style: none; padding: 0; max-width: 500px; margin: 0 auto; }
-        .index-item { 
-            padding: 12px 0; border-bottom: 1px dashed var(--gold); 
-            cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between;
-            font-family: 'Playfair Display', serif;
-        }
-        .index-item:hover { color: var(--accent); transform: translateX(10px); }
-
-        .nav { margin-bottom: 50px; display: flex; gap: 20px; align-items: center; }
-        .btn { 
-            background: none; border: 1px solid var(--gold); color: var(--text); 
-            padding: 10px 20px; cursor: pointer; font-family: 'Playfair Display', serif;
-            border-radius: 4px;
-        }
-        .btn:hover { background: var(--gold); color: white; }
-
-        .theme-switch {
-            position: fixed; top: 20px; right: 20px; background: var(--paper);
-            border: 1px solid var(--gold); padding: 8px 15px; border-radius: 20px;
-            cursor: pointer; z-index: 100; color: var(--text); font-size: 0.8rem;
-        }
-
-        ul { padding-left: 20px; margin-bottom: 20px; }
-        li { margin-bottom: 10px; line-height: 1.6; }
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: block; margin-bottom: 0.5rem; color: #333; font-weight: 600; }
+        input { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+        
+        button { width: 100%; padding: 0.75rem; background-color: #003366; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; transition: background 0.3s; }
+        button:hover { background-color: #002244; }
+        
+        .error { color: #d9534f; margin-bottom: 1rem; font-size: 0.9rem; text-align: center; display: none; }
+        
+        /* Dashboard Options Grid */
+        .menu-grid { display: grid; gap: 1rem; margin-top: 1rem; }
+        .menu-btn { background-color: #ffffff; border: 2px solid #003366; color: #003366; font-weight: bold; text-align: left; padding: 1rem; border-radius: 6px; }
+        .menu-btn:hover { background-color: #003366; color: white; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="lock-screen">
-        <div class="lock-box">
-            <h2>Acceso al Guardián</h2>
-            <p class="welcome-text">Bienvenida a este pequeño espacio digital, diseñado con la paciencia de quien cuenta las estrellas y el cariño de quien guarda cada recuerdo en una caja de cristal.</p>
-            <input type="text" id="passwordInput" placeholder="Escribe la clave..." onkeypress="if(event.key === 'Enter') checkPassword()">
-            <button onclick="checkPassword()">Entrar</button>
-            <p id="errorMessage" style="color: var(--accent); font-size: 0.85rem; margin-top: 15px; display: none;">Clave incorrecta, Señorita.</p>
-        </div>
-    </div>
-
-    <button class="theme-switch" id="modeBtn" onclick="toggleMode()">MODO OSCURO</button>
-
-    <div class="book-container">
-        
-        <div class="page active" id="p0">
-            <h1>Lissette Alexandra: <br> Un Retrato de lo Extraordinario</h1>
-            <p class="subtitle">Manual de un Guardián sobre la belleza de lo auténtico</p>
-            <div style="text-align: center; margin-top: 100px;">
-                <p><strong>Escrito por:</strong> Carlos Marcenaro</p>
-                <p><strong>Para:</strong> Lissette Alexandra Jovel Cornejo</p>
+    <div id="login-section" class="card">
+        <h2>Acceso al Sistema ISSS</h2>
+        <div id="error-msg" class="error">Usuario o contraseña incorrectos.</div>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" required placeholder="Ingrese su usuario">
             </div>
-        </div>
-
-        <div class="page" id="p1">
-            <h2>Índice</h2>
-            <ul class="index-list">
-                <li class="index-item" onclick="goToPage(2)"><span>Dedicatoria</span><span>II</span></li>
-                <li class="index-item" onclick="goToPage(3)"><span>Carta de Intención</span><span>III</span></li>
-                <li class="index-item" onclick="goToPage(4)"><span>Cap. 1 – La Geografía de lo Genuino</span><span>01</span></li>
-                <li class="index-item" onclick="goToPage(5)"><span>Cap. 2 – La Medicina de las Mañanas</span><span>02</span></li>
-                <li class="index-item" onclick="goToPage(6)"><span>Cap. 3 – La Resiliencia</span><span>03</span></li>
-                <li class="index-item" onclick="goToPage(7)"><span>Cap. 4 - El Mapa de las Aventuras</span><span>04</span></li>
-                <li class="index-item" onclick="goToPage(8)"><span>Cap. 5 - El Protocolo del Cuidado</span><span>05</span></li>
-                <li class="index-item" onclick="goToPage(9)"><span>Cap. 6: Epílogo</span><span>06</span></li>
-                <li class="index-item" onclick="goToPage(10)"><span>Cap. 7: Relato</span><span>07</span></li>
-                <li class="index-item" onclick="goToPage(11)"><span>Contraportada</span><span>VIII</span></li>
-            </ul>
-        </div>
-
-        <div class="page" id="p2">
-            <h2>Dedicatoria</h2>
-            <p>Para la niña de la sonrisa de plata y los ojos que recargan mi alma.
-
-            Este libro no es una historia terminada pero es el mapa de lo mucho que significas para mí y espero poder lograr demostrar lo especial que eres bombón </p>
-        </div>
-
-        <div class="page" id="p3">
-            <h2>Carta de Intención</h2>
-            <p>hola lis pues este es mi primer libro que escribo como de manera formal quiero que sea agradable de leer y que te guste que no te aburra en el camino y que llegues hasta el final, si algo esta mal escrito disculpa pero he decidido escribir este intento de libro porque las palabras dichas se las lleva el viento, pero lo que se escribe queda guardado en el tiempo. Quise que tuvieras algo físico o un documento digital pero algo tuyo, donde pudieras leer en los días difíciles y en los buenos también lo mucho que te admiro te quiero te adoro y aprecion. No soy escritor, pero sí soy un hombre que te observa con detenimiento y aveces un con bastante detenimiento te escucho y te observo. Y lo que veo, Lissette, es extraordinario y maravilloso. Este libro es mi forma de decirte que, aunque el mundo sea caótico como bien sabemos ya jaja, aquí tienes a alguien que siempre será tu lugar seguro o tu pañuelo de lagmiras, tu apoyo y esa persona que te ayudara a salir de cualquier situacióndifícil o complicada siempre cuantas con migo.</p>
-        </div>
-
-        <div class="page" id="p4">
-            <h2>Capítulo 1 – La Geografía de lo Genuino</h2>
-            <p>(Capítulo 1 – La Geografía de lo Genuino)
-            ​A veces al leer libros te detienes a pensar y analisas las cosas mas de lo normal con una sola hoja sacas mucha información que analizar. Pero en esta parte quiero que mientras lees estas líneas, estos textos entiendas primero que nada que tu valor no es una cifra negociable y tampoco estándar de redes sociales tu vales billones de millones por esa humanidad sentimental que te desborda, por tu terquedad que es en realidad una brújula propia, si el mundo insiste en que la belleza es perfección pues yo te digo que la tuya es la belleza de la realidad que aun con esas espinillas que a veces te aparecen son solo pequitas de vida que te hacen humana y te prometo que te ves hermosa con ellas aun con las grandes y dolorosas.
-            
-            ​y quiero decirte que si para otros eres valiosa para mí vales el triple y eres una chica que quiero siemrpe en mi vida la personita que nunca quiero perder, dicen que uno no sabe lo que tiene hasta que lo pierde.
-            
-            Pues imagínate yo que haria si te pierdo que si se lo que tengo y a quien tengo sin perderte </p>
-        </div>
-
-        <div class="page" id="p5">
-            <h2>Capítulo 2 – La Medicina de las Mañanas</h2>
-            <p>(Capítulo 2 – La Medicina de las Mañanas)
-            Buenos dias inicio del dia y no tienes idea lo lindo empcionante positivo que se siente despertar y encontrar un mensaje de buenos dias tuyo son detalles quente llenan de vida y te recuerdan porque te levantas temprano, los dias en que no estas de noche y llebamos turno juntos es la chispa que hace que me aregle bien para ir a trabajar aun con poco tiempo pero sin duda alguna mi momento favorito, el punto exacto donde la jornada cobra sentido, es cuando te veo y me das un pequeño abrazo, esos abrazos de la mañana no son solo un gesto; son mi medicina mi energizante mi vitamina, Es como si el cansancio del día anterior se borrara al sentirte cerca.
-            ​Cada vez que nos vamos al gimnasio, no estoy solo entrenando; estoy disfrutando de tu presencia. Y esas salidas a comer después, donde nuestra rutina juntos el cansancio y las risas, son mis rituales favoritos y muchas gracias por permitirme ser quien te acompaña en el día a día el que te cuida y te ayuda el que aveces te enseña pero tambien aprendo de ti y mucho y aprendo por ti tambien eres un gran incentivo a mejorar y siempre estar aprendiendo cosas nuevas que me sirven para aprender y cuidarte en cualquier situación o sircustancia
-            
-            Mil gracias enserió por formar parte de mi vida y permitirme ser parte de tu vida y tus dias </p>
-        </div>
-
-        <div class="page" id="p6">
-            <h2>Capítulo 3 – La Resiliencia</h2>
-            <p>(Capítulo 3 – La Resiliencia)
-            ​Hemos superado problemas que a otros los habrían hecho rendirse. Pero tú, con tu carácter fuerte y tu necedad encantadora, siempre sales adelante. Me impresiona tu capacidad de levantarte. Recuerda que no importa qué tan grande sea el desafío, no lo enfrentas sola. Juntos somos, simplemente, mejores.</p>
-        </div>
-
-        <div class="page" id="p7">
-            <h2>Capítulo 4 - El Mapa de las Aventuras</h2>
-            <p>(Capítulo 4 - El Mapa de las Aventuras)</p>
-            <ul>
-                <li><strong>Guatemala:</strong> donde cruzaremos no solo fronteras sino que también de experiencias.</li>
-                <li><strong>Puerta del Diablo:</strong> Estaré ahí para sostenerte ya que la altura no importa si es a tu lado cualquier temor desaparece si es para protegerte y cuidarte</li>
-                <li><strong>Karaoke:</strong> Seré tu fan número uno incluso cuando desafinemos juntos subiremos al escenario y cantaremos como si fuéramos 2 profesionales frente al público dando un gran concierto</li>
-                <li><strong>Skydeck y Coffee Lake:</strong> Lugares que veré distinto porque los veré a través de tus ojos desde las alturas y sentir el viento hasta un cafe en el lago y hasta andar en moto de agua sin peligro de chocar</li>
-            </ul>
-        </div>
-
-        <div class="page" id="p8">
-            <h2>Capítulo 5 - El Protocolo del Cuidado</h2>
-            <p>(Capítulo 5 - El Protocolo del Cuidado)
-            ​La parte más difícil de mi día es cuando el tiempo nos obliga a separarnos. Ir a dejarte a la parada del bus o esperar el Indriver es un ejercicio de paciencia y mucha preocupación. Mi mente no descansa hasta que sé que has cruzado la puerta de tu casa. Mi cuidado por ti no conoce horarios; estoy pendiente de cada cosita que necesites, hoy, mañana y siempre sin importar la hora o lo que este haciendo tu siempre te mantienes en mis pensamientos intentando ser mi mejor versión con tigo te quiero y enserió solo quiero lo mejor para ti verte feliz es mi mejor recompensa de mi esfuerzo por cuidarte cada dia aunque sea por mensajes gracias por permitirme hacerte un poquito mejor los dias y por dejarme cuidarte sabes que en cualquier momento que me necesites estare para ti tu solo llámame y mi tiempo y atención sera tuyo mi lis</p>
-        </div>
-
-        <div class="page" id="p9">
-            <h2>Capítulo 6: Epílogo</h2>
-            <p>(Capítulo 6: Epílogo)
-            ​Eres mi niña preciosa, mi compañera de batallas mi gymcrush  y la persona que elijo consentir a cada hora de cada dia, Gracias por dejarme ser parte de tu mundo Lissette Alexandra Jovel Cornejo te quiero demasiado ya llevamos una parte de esto llamado libro la verdad no se si voy bien o mal solo redacto una historia pensamientos y sentimientos ya que esto es una prueba del cariño amor e importancia que tienes tu para mi y se que en ocasiones por querer hacerte bien o abrirte los ojitos bellos y hermosos te e terminado haciendo sentir mal o enojando pero te pido mil disculpas sabes que lo que ago es por ti por que estes bien o por buscar tu aprobación en ocasiones si quiero pasar demasiado tiempo con tigo o busco tu atención es por eso por eso poco a poco trabajando para mejorar cada dia y poder brindarte mi mejor versión </p>
-        </div>
-
-        <div class="page" id="p10">
-            <h2>Capítulo 7: Relato</h2>
-            <p>muy bien hasta el momento siento que el libro se a quedado corto y esto lo escribo otro dia despues que pasaramos por varias coasa pues esto es del primer reclamo que te e echo la verdad me dolio sentia que si te decia algo te podia llegar a perder de manera inmediata pero ahora estoy mas tranquilo siento que somos un gran equipo y siento que tenemos buena comunicacion aunque no siempre la usamos jaja pero es lo bueno no? que cualquier cosa lo podremos hablar y se que terminaremos resolviendolo esta parte del libro ya es mas extensa ya que aqui comienxa a contar una historia y puede que se pierda un poco el formato que veia dandole aqui ya es mas como un libro de histroria pero esta historia no es solo mia ni tuya si no que es una historia mutua es una historia que juntos hemos forjado este no es un libro cualquiera es nuestro libro lo ideal siento que lo hicieramos juntos pero ya veremos que sucede luego como siempre hacemos y me gusta ya que por eso hemos hecho y pasado por grandes cosas y grandes momentos no somos rutinarios y es lo bueno siemrpe estamos haciendo cosas nuevas o pasando por diferentes cosas siempre hay una sorpresa cada dia nos veamos o no siempre nos sucede algo unico y bonito porque despues de nuestras tormentas tenemos calma y deverdad e tenido amistades bonitas con mucha confianza incluso mas de la que tenemos nosotros pero de algo si estoy seguro y se que es asi ninguna a sido como la uestra lo de nostros es otra cosa otro level jajaja esta parte siento que es la mas sincera de toda la parte de este libro ya que aqui estoy escribiendo con el corazon sin analizar tanto las cosas perdon si derrepente comienzo a escribir muy sentimental pero es lo bueno de un libro no? el sentimiento que transmite. 
-            
-            recuerdo el dia en que te conoci jajaja saliendo de turno de 10 a 6 ya estaba oscuro de echo y me queria ir jajajaja y en eso llegaste tu iniciando turno de noche y sin saber nada de ti me tramitiste una vibra o una sensacion buena no se eso que siento de pasar tiempo con tigo lo senti desde el primer dia literal senti la coneccion con tigo desde el primer momento de echo tanto era asi que la ota ves que te vi confundi tu nombre jajaja y alli fue que empezamos a hablar realmente no recuerdo la fecha ni la fecha de nuestro primer mensaje lastimosamente ya no tengo todo eso en el cel pero lo recuerdo en mi memoria la cual es mala jajaja pero cuendo un recuerdo llega al corazon se mantiene alli y bueno empezamos a hablar alli pude ver tus ojos por primera ves esos ojos que hasta la fecha me encanta cruzarle mirada esos ojos brillosos cafes clarito que con la luz son mas casi como si fuera el mismo color de la miel tan bellos unos ojos que la primera ves que los vi me llamaron la atencion me dijeron esta chica es super linda y no es por tu fisico si no que fue al ver tus ojos la ventana al alma vi a una chica soñadora risueña con ganas de aprender cosas nuevas con ganas de tener adrenalina hacer cosas que quiere y no quedarse con las ganas y bueno luego hablamos de tu cel por el spen que no funcionaba y fue raro al halblar con tigo me senti bien no me senti nervioso ni nada luego te vi reir fue tan lindo que rieras con migo se sintio de nuevo la coneccion y luego los primeros mensajes jajaja no recuerdo que era pero seguro que era una escusa mia solo para poder hablarte mas o no recuerdo jajaja 
-            
-            despues comenzamos a hablar a salir a conocernos mas a tenernos mas cnfianza que la verdad siento que cada dia incrmenta mas literal del hospital eres la unica en la que confio en la que se que te puedo decir o contar cosas que a los demas no te fui agarrando cariño cada dia mas te quiero mucho por eso te cuido tanto quiero que sepas lo importante y especial que eres para mi cada que puedo por eso te lleno de detalles regalos desde una coca un chocalatito hasta regalos mas grandes si yo puedo te doy todo para demostrarte lo valiosa que eres para mi de verdad que para mi eres una chica que me importa mucho que me interesa que estes bien cada dia tanto asi que prefiero en ocasiones sufir o guardarme algo que me duelo o hace daño para no lastimarte a ti en ningun momento 
-            
-            con tigo aplicaria la frase ojala te hubiera conocido antes pero la verdad prefiero que las cosas se dieran como han pasasdo porque no se que podria ser diferente y quizas las no estuvieramos como ahora o estuvieramos mejor eso no se pero yo estoy feliz de como nos encontramos actualmente tu y yo te quiero te adoro se que sabes bien lo que yo siento por ti tambien eso implica bastante en mis decisiones aveces porque no las pienso simplemente dejo que mis emociones mi corazon las realiza
-            
-            este libro es de todo la verdad un regalo un detalle una confecion una historia y mucho mas por eso mismo te propongo que agamos una actualizacion luego y juntos terminemos el libro o hacer otro si te parece 
-            
-            te quiero demasiado enserio siento mil cosas por ti muy lindas y aveces cosas que me preocupan por sentirlas porque siento que por eso puedo terminar perdiendote me gustaria decirte muchas cosas la verdad no malas pero no se como lo tomarias por eso prefiero mantenerme igual y disfrutar cada momento que pasamos juntos y solo intentar demostrarte lo que te quiero por no decir lo que te amo, se que es una palabra fuerte para decirle a alguien pero es lo que siento y asi </p>
-        </div>
-
-        <div class="page" id="p11">
-            <h2 style="border:none;">~ Contraportada ~</h2>
-            <p style="text-align: center; font-style: italic; margin-top: 50px;">
-                Este documento no contiene toda la verdad sobre lo que siento por ti, porque mi sentimiento no cabe en páginas. Contiene, sin embargo, la promesa de que, mientras la vida lo permita, estaré pendiente de cada paso que des. 
-                <br><br>
-                Eres mi niña preciosa, hoy y siempre.
-            </p>
-        </div>
-
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" required placeholder="Ingrese su contraseña">
+            </div>
+            <button type="submit">Iniciar Sesión</button>
+        </form>
     </div>
 
-    <div class="nav">
-        <button class="btn" id="prevBtn" onclick="changePage(-1)">Anterior</button>
-        <span id="pageIndicator">Página 1 de 12</span>
-        <button class="btn" id="nextBtn" onclick="changePage(1)">Siguiente</button>
+    <div id="dashboard-section" class="card hidden" style="max-width: 600px;">
+        <h2>Menú Principal</h2>
+        <div class="menu-grid">
+            <button class="menu-btn" onclick="navegar('Constancias de Permanencia')">1. Constancias de Permanencia</button>
+            <button class="menu-btn" onclick="navegar('Listado QR')">2. Listado QR</button>
+            <button class="menu-btn" onclick="navegar('Información de Pacientes')">3. Información de Pacientes</button>
+            <button class="menu-btn" onclick="navegar('Pantallas')">4. Pantallas</button>
+            <button class="menu-btn" onclick="navegar('Domiciliar')">5. Domiciliar</button>
+            <button class="menu-btn" onclick="navegar('Web Impacto')">6. Web Impacto</button>
+            <button class="menu-btn" onclick="navegar('Agenda Médica')">7. Agenda Médica</button>
+        </div>
     </div>
-
-    <audio id="flipSound">
-        <source src="https://www.soundjay.com/misc/sounds/page-flip-01a.mp3" type="audio/mpeg">
-    </audio>
 
     <script>
-        const CLAVE_CORRECTA = "la empleada"; 
-        let currentIdx = 0;
-        const pages = document.querySelectorAll('.page');
-        const sound = document.getElementById('flipSound');
+        const USER_VALIDO = "HMQ.ISSS.sv";
+        const PASS_VALIDO = "Hmqisss2026";
 
-        window.onload = () => {
-            if(localStorage.getItem('libroAcceso') === 'concedido') {
-                document.getElementById('lock-screen').style.display = 'none';
-            }
-        };
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-msg');
 
-        function checkPassword() {
-            const input = document.getElementById('passwordInput').value.toLowerCase().trim();
-            if(input === CLAVE_CORRECTA) {
-                document.getElementById('lock-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('lock-screen').style.display = 'none';
-                    localStorage.setItem('libroAcceso', 'concedido');
-                }, 1000);
+            if (user === USER_VALIDO && pass === PASS_VALIDO) {
+                errorMsg.style.display = 'none';
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
             } else {
-                document.getElementById('errorMessage').style.display = 'block';
+                errorMsg.style.display = 'block';
             }
-        }
+        });
 
-        function updateDisplay() {
-            pages.forEach((p, i) => p.classList.toggle('active', i === currentIdx));
-            document.getElementById('pageIndicator').innerText = `Página ${currentIdx + 1} de ${pages.length}`;
-            document.getElementById('prevBtn').disabled = (currentIdx === 0);
-            document.getElementById('nextBtn').disabled = (currentIdx === pages.length - 1);
+        function navegar(modulo) {
+            alert(`Accediendo al módulo: ${modulo}`);
         }
-
-        function changePage(dir) {
-            let next = currentIdx + dir;
-            if (next >= 0 && next < pages.length) {
-                if (document.body.classList.contains('dark-mode')) {
-                    sound.currentTime = 0;
-                    sound.play().catch(e => {});
-                }
-                currentIdx = next;
-                updateDisplay();
-                window.scrollTo(0,0);
-            }
-        }
-
-        function goToPage(index) {
-            currentIdx = index;
-            updateDisplay();
-            window.scrollTo(0,0);
-        }
-
-        function toggleMode() {
-            document.body.classList.toggle('dark-mode');
-            document.getElementById('modeBtn').innerText = document.body.classList.contains('dark-mode') ? "MODO DIURNO" : "MODO LECTURA";
-        }
-
-        updateDisplay();
     </script>
 </body>
 </html>
