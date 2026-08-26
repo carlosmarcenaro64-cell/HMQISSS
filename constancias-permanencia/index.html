@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constancias de Permanencia - HMQ ISSS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="css/constancias.css">
+</head>
+<body>
+
+    <div class="card dashboard-card fade-in">
+        <div class="header-dashboard">
+            <div>
+                <h2><i class="fa-solid fa-file-medical"></i> Constancias de Permanencia</h2>
+                <p>Atención Directa al Usuario (HMQ)</p>
+            </div>
+            <button onclick="window.location.href='../index.html'" class="btn-logout" title="Regresar al Menú Principal">
+                <i class="fa-solid fa-house"></i>
+            </button>
+        </div>
+
+        <form id="constancia-form" class="form-grid">
+            <div class="form-group">
+                <label for="const-fecha">Fecha</label>
+                <input type="date" id="const-fecha" required>
+            </div>
+
+            <div class="form-group">
+                <label for="const-nombre">Nombre del Paciente / Acompañante</label>
+                <input type="text" id="const-nombre" required placeholder="Ej: CARLOS MANUEL ROSALES">
+            </div>
+
+            <div class="form-group">
+                <label for="const-dui">DUI o Afiliación</label>
+                <input type="text" id="const-dui" required placeholder="00000000-0" pattern="\d{8}-\d">
+            </div>
+
+            <div class="form-group">
+                <label for="const-correo">Correo Electrónico (Envío Virtual)</label>
+                <input type="email" id="const-correo" placeholder="paciente@correo.com">
+            </div>
+
+            <div class="form-group">
+                <label for="const-empresa">Empresa o Lugar a Presentar</label>
+                <input type="text" id="const-empresa" required placeholder="Ej: MINED, Telus Digital...">
+            </div>
+
+            <div class="form-group">
+                <label for="const-entrada">Hora de Entrada</label>
+                <input type="time" id="const-entrada" required>
+            </div>
+
+            <div class="form-group">
+                <label for="const-salida">Hora de Salida</label>
+                <input type="time" id="const-salida" required>
+            </div>
+
+            <div class="form-group">
+                <label for="const-motivo">Motivo de la Visita</label>
+                <select id="const-motivo" required>
+                    <option value="">Seleccione motivo...</option>
+                    <option value="EMERGENCIA">EMERGENCIA</option>
+                    <option value="Agendamiento de Cita USG">Agendamiento de Cita USG</option>
+                    <option value="Laboratorio">Laboratorio</option>
+                    <option value="Farmacia">Farmacia</option>
+                    <option value="Consulta Bajo Riesgo">Consulta Bajo Riesgo</option>
+                    <option value="Visita">Visita</option>
+                    <option value="Acompañante de paciente">Acompañante de paciente</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="const-ejecutivo">Quién Entregó (Ejecutivo)</label>
+                <input type="text" id="const-ejecutivo" required placeholder="Ej: Carmen Gavarrete (MINSAL)">
+            </div>
+
+            <div class="form-group">
+                <label for="const-ultima">Última Constancia Emitida</label>
+                <input type="text" id="const-ultima" readonly placeholder="Calculado automáticamente..." class="input-readonly">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="const-obs">Observaciones</label>
+                <input type="text" id="const-obs" placeholder="Ej: ACOMPAÑANTE: MARIA AMPARO PEREZ...">
+            </div>
+
+            <div class="form-actions full-width">
+                <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Guardar y Emitir</button>
+                <button type="button" class="btn btn-secondary" onclick="enviarCorreoVirtual()"><i class="fa-solid fa-paper-plane"></i> Enviar por Correo</button>
+            </div>
+        </form>
+
+        <div class="table-container margin-top">
+            <h3>Registros Recientes</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Nombre</th>
+                        <th>DUI / Afiliación</th>
+                        <th>Empresa</th>
+                        <th>Entrada / Salida</th>
+                        <th>Motivo</th>
+                        <th>Entregó</th>
+                        <th>Última Constancia</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-constancias-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/constancias.js"></script>
+</body>
+</html>
