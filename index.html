@@ -3,115 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Hospitalario - HMQ ISSS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Sistema de Llamados - Hospital</title>
+    <!-- Tailwind CSS para diseño moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .pulse-soft {
+            animation: pulseSoft 2s infinite;
+        }
+        @keyframes pulseSoft {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+    </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
 
-    <!-- Pantalla de Autenticación -->
-    <div id="login-section" class="card fade-in">
-        <div class="header">
-            <div class="logo-icon pulse">
-                <i class="fa-solid fa-hospital-user"></i>
-            </div>
-            <h2>Portal HMQ.ISSS</h2>
-            <p>Acceso del Personal Autorizado</p>
-        </div>
-        
-        <div id="error-msg" class="error">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>Credenciales de acceso no válidas.</span>
-        </div>
-
-        <form id="login-form">
-            <div class="form-group">
-                <label for="username">Usuario institucional</label>
-                <div class="input-wrapper">
-                    <i class="fa-solid fa-user"></i>
-                    <input type="text" id="username" required placeholder="HMQ.ISSS.sv" autocomplete="off">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <div class="input-wrapper">
-                    <i class="fa-solid fa-lock"></i>
-                    <input type="password" id="password" required placeholder="••••••••">
-                </div>
-            </div>
-            <button type="submit" class="btn">
-                <span>Ingresar al Sistema</span>
-                <i class="fa-solid fa-arrow-right"></i>
-            </button>
-        </form>
+    <div id="app" class="flex-1 flex flex-col">
+        <!-- Contenido dinámico inyectado por JS -->
     </div>
 
-    <!-- Menú Principal (Dashboard) -->
-    <div id="dashboard-section" class="card dashboard-card hidden">
-        <div class="header-dashboard">
-            <div>
-                <h2>Panel de Gestión Hospitalaria</h2>
-                <p>Seleccione el módulo que desea consultar</p>
-            </div>
-            <button id="logout-btn" class="btn-logout" title="Cerrar sesión">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
-        </div>
+    <script>
+        // Usamos BroadcastChannel y localStorage para sincronizar Celular y TV en tiempo real (incluso en GitHub Pages)
+        const channel = new BroadcastChannel('hospital_llamados_channel');
 
-        <div class="menu-grid">
-            <div class="menu-card highlight" onclick="navegar('Constancias de Permanencia')">
-                <div class="menu-icon"><i class="fa-solid fa-file-medical"></i></div>
-                <div class="menu-info">
-                    <h4>Constancias de Permanencia</h4>
-                    <p>Emisión y verificación</p>
-                </div>
-            </div>
-            <div class="menu-card" onclick="navegar('Listado QR')">
-                <div class="menu-icon"><i class="fa-solid fa-qrcode"></i></div>
-                <div class="menu-info">
-                    <h4>Listado QR</h4>
-                    <p>Escaneo y registro</p>
-                </div>
-            </div>
-            <div class="menu-card" onclick="navegar('Información de Pacientes')">
-                <div class="menu-icon"><i class="fa-solid fa-id-card"></i></div>
-                <div class="menu-info">
-                    <h4>Información de Pacientes</h4>
-                    <p>Búsqueda por DUI</p>
-                </div>
-            </div>
-            <div class="menu-card" onclick="navegar('Pantallas')">
-                <div class="menu-icon"><i class="fa-solid fa-desktop"></i></div>
-                <div class="menu-info">
-                    <h4>Pantallas</h4>
-                    <p>Monitoreo de salas</p>
-                </div>
-            </div>
-            <div class="menu-card" onclick="navegar('Domiciliar')">
-                <div class="menu-icon"><i class="fa-solid fa-house-medical"></i></div>
-                <div class="menu-info">
-                    <h4>Domiciliar</h4>
-                    <p>Atención en casa</p>
-                </div>
-            </div>
-            <div class="menu-card" onclick="navegar('Web Impacto')">
-                <div class="menu-icon"><i class="fa-solid fa-chart-line"></i></div>
-                <div class="menu-info">
-                    <h4>Web Impacto</h4>
-                    <p>Estadísticas e indicadores</p>
-                </div>
-            </div>
-            <div class="menu-card" onclick="navegar('Agenda Médica')">
-                <div class="menu-icon"><i class="fa-solid fa-calendar-check"></i></div>
-                <div class="menu-info">
-                    <h4>Agenda Médica</h4>
-                    <p>Citas y programación</p>
-                </div>
-            </div>
-        </div>
-    </div>
+        let state = {
+            view: 'selector', // 'selector', 'operator', 'tv'
+            currentCall: {
+                ticket: '---',
+                location: 'Seleccione un destino',
+                time: '--:--'
+            },
+            history: []
+        };
 
-    <script src="js/app.js"></script>
+        function loadState() {
+            const savedState = localStorage.getItem('hospital_call_state');
+            if (savedState) {
+                try {
+                    state = JSON.parse(savedState);
+                } catch(e) { console.error(e); }
+            }
+        }
+
+        function saveAndBroadcastState() {
+            localStorage.setItem('hospital_call_state', JSON.stringify(state));
+            channel.postMessage(state);
+        }
+
+        channel.onmessage = (event) => {
+            state = event.data;
+            if (state.view === 'tv') {
+                renderTV();
+            } else if (state.view === 'operator') {
+                renderOperator();
+            }
+        };
+
+        function renderSelector() {
+            const app = document.getElementById('app');
+            app.className = "flex-1 flex items-center justify-center p-4 md:p-6 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950";
+            app.innerHTML = `
+                <div class="max-w-4xl w-full bg-slate-800/80 backdrop-blur-xl border border-slate-700 p-6 md:p-12 rounded-3xl shadow-2xl text-center">
+                    <div class="inline-flex items-center justify-center p-4 bg-blue-600/20 text-blue-400 rounded-2xl mb-6 shadow-inner">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    </div>
+                    <h1 class="text-2xl md:text-5xl font-black text-white tracking-tight mb-4">Sistema de Gestión de Turnos</h1>
+                    <p class="text-slate-400 text-sm md:text-lg mb-8 max-w-xl mx-auto">Selecciona cómo deseas usar este dispositivo en este momento.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <button onclick="setMode('operator')" class="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white p-6 md:p-8 rounded-2xl shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-left flex flex-col justify-between border border-blue-400/30">
+                            <div>
+                                <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-4 text-2xl">📱</div>
+                                <h3 class="text-xl md:text-2xl font-bold mb-2">Control Remoto (Celular)</h3>
+                                <p class="text-blue-100 text-xs md:text-sm opacity-90">Ideal para llevar en el teléfono sin bloqueos y dictar los turnos rápidamente.</p>
+                            </div>
+                            <div class="mt-6 flex items-center text-sm font-semibold text-blue-200 group-hover:translate-x-2 transition-transform">
+                                Abrir Control Celular &rarr;
+                            </div>
+                        </button>
+
+                        <button onclick="setMode('tv')" class="group relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white p-6 md:p-8 rounded-2xl shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-left flex flex-col justify-between border border-emerald-400/30">
+                            <div>
+                                <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-4 text-2xl">📺</div>
+                                <h3 class="text-xl md:text-2xl font-bold mb-2">Pantalla de Sala (TV / Monitor)</h3>
+                                <p class="text-emerald-100 text-xs md:text-sm opacity-90">Para la pantalla gigante en la sala de espera. Muestra turnos y emite sonidos.</p>
+                            </div>
+                            <div class="mt-6 flex items-center text-sm font-semibold text-emerald-200 group-hover:translate-x-2 transition-transform">
+                                Iniciar Pantalla TV &rarr;
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setMode(mode) {
+            state.view = mode;
+            saveAndBroadcastState();
+            if (mode === 'operator') renderOperator();
+            else renderTV();
+        }
+
+        let currentSelectedDestination = 'Área: Selección de Pacientes';
+
+        function renderOperator() {
+            const app = document.getElementById('app');
+            app.className = "flex-1 flex flex-col bg-slate-900 p-3 md:p-6 max-w-2xl mx-auto w-full";
+            app.innerHTML = `
+                <!-- Cabecera del Control Celular -->
+                <header class="flex justify-between items-center bg-slate-800 border border-slate-700 px-4 py-3 rounded-2xl shadow-lg mb-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-2xl">📱</span>
+                        <div>
+                            <h2 class="text-base font-bold text-white">Control Remoto</h2>
+                            <p class="text-[10px] text-emerald-400 font-medium">● Sincronizado en vivo con GitHub</p>
+                        </div>
+                    </div>
+                    <button onclick="setMode('selector')" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-xs font-semibold">
+                        Menú
+                    </button>
+                </header>
+
+                <!-- Panel Principal de Control Móvil -->
+                <div class="space-y-4 flex-1 flex flex-col justify-between">
+                    <div class="bg-slate-800/90 border border-slate-700 p-4 md:p-6 rounded-2xl shadow-xl space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">1. Número de Turno / Paciente</label>
+                            <input type="text" id="ticketInput" placeholder="Ej. A-012" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-xl font-black uppercase focus:outline-none focus:border-blue-500 tracking-wider">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">2. Destino / Consultorio</label>
+                            <select id="mobileDestSelect" onchange="currentSelectedDestination = this.value" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white font-bold text-base focus:outline-none focus:border-blue-500">
+                                <option value="Área: Selección de Pacientes" ${currentSelectedDestination === 'Área: Selección de Pacientes' ? 'selected' : ''}>📋 Área: Selección de Pacientes</option>
+                                ${Array.from({length: 12}, (_, i) => {
+                                    const name = `Consultorio ${i+1 < 10 ? '0'+(i+1) : i+1}`;
+                                    return `<option value="${name}" ${currentSelectedDestination === name ? 'selected' : ''}>🚪 ${name}</option>`;
+                                }).join('')}
+                            </select>
+                        </div>
+
+                        <button onclick="callCurrent()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black py-4 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center justify-center space-x-2 text-lg">
+                            <span>📢 LLAMAR TURNO AHORA</span>
+                        </button>
+                    </div>
+
+                    <!-- Turno actual en curso visto desde el celular -->
+                    <div class="bg-slate-800/60 border border-slate-700/80 p-4 rounded-2xl">
+                        <span class="text-xs text-slate-400 block mb-1">Último turno enviado al TV:</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-2xl font-black text-white" id="activeTicketDisplay">${state.currentCall.ticket}</span>
+                            <span class="text-xs bg-blue-600/30 text-blue-300 px-3 py-1 rounded-lg font-semibold" id="activeLocationDisplay">${state.currentCall.location}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function callCurrent() {
+            const ticketInput = document.getElementById('ticketInput');
+            const ticketVal = ticketInput.value.trim();
+
+            if (!ticketVal) {
+                showNotification("Ingrese el número de turno", "error");
+                return;
+            }
+
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            state.history.unshift(state.currentCall);
+            if (state.history.length > 4) state.history.pop();
+
+            state.currentCall = {
+                ticket: ticketVal.toUpperCase(),
+                location: currentSelectedDestination,
+                time: timeString
+            };
+
+            saveAndBroadcastState();
+            showNotification(`¡Turno ${ticketVal.toUpperCase()} enviado con éxito!`, "success");
+            
+            ticketInput.value = '';
+            ticketInput.focus();
+            
+            // Actualizar vista rápida en el celular si está montado
+            const activeT = document.getElementById('activeTicketDisplay');
+            const activeL = document.getElementById('activeLocationDisplay');
+            if(activeT) activeT.innerText = state.currentCall.ticket;
+            if(activeL) activeL.innerText = state.currentCall.location;
+        }
+
+        function renderTV() {
+            const app = document.getElementById('app');
+            app.className = "flex-1 flex flex-col bg-slate-950 text-white p-6 justify-between overflow-hidden";
+            app.innerHTML = `
+                <header class="flex justify-between items-center border-b border-slate-800 pb-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-blue-600 text-white font-black px-4 py-2 rounded-xl text-xl shadow-lg">HMQ</div>
+                        <div>
+                            <h1 class="text-2xl font-bold tracking-tight">Sala de Espera - Consultorios Médicos</h1>
+                            <p class="text-slate-400 text-sm">Por favor manténgase atento a su turno</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="tvClock" class="text-3xl font-black text-blue-400">00:00:00</div>
+                        <button onclick="setMode('selector')" class="text-xs text-slate-500 hover:text-slate-300 mt-1">Configuración / Salir</button>
+                    </div>
+                </header>
+
+                <div class="my-auto py-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-slate-900 border-2 border-blue-500/50 rounded-3xl p-8 lg:p-12 shadow-2xl pulse-soft">
+                        <div class="text-center lg:text-left border-b lg:border-b-0 lg:border-r border-blue-500/30 pb-6 lg:pb-0 lg:pr-8">
+                            <span class="text-blue-400 font-bold tracking-widest uppercase text-sm md:text-base block mb-2">TURNO ACTUAL</span>
+                            <div id="tvCurrentTicket" class="text-6xl md:text-8xl font-black text-white tracking-wider drop-shadow-lg">
+                                ${state.currentCall.ticket}
+                            </div>
+                        </div>
+                        <div class="text-center lg:text-left">
+                            <span class="text-emerald-400 font-bold tracking-widest uppercase text-sm md:text-base block mb-2">DESTINO / CONSULTORIO</span>
+                            <div id="tvCurrentLocation" class="text-4xl md:text-6xl font-black text-emerald-300 drop-shadow-lg leading-tight">
+                                ${state.currentCall.location}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center">
+                        <span class="w-2 h-2 bg-slate-500 rounded-full inline-block mr-2"></span>
+                        Últimos Llamados Recientes
+                    </h3>
+                    <div id="tvHistoryList" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        ${state.history.filter(h => h.ticket && h.ticket !== '---').length === 0 ? 
+                            `<div class="text-slate-500 text-sm italic col-span-3 text-center py-2">Sin llamados previos registrados en la sesión actual.</div>` :
+                            state.history.filter(h => h.ticket && h.ticket !== '---').slice(0, 3).map(item => `
+                                <div class="bg-slate-800/90 border border-slate-700/60 rounded-xl p-3 flex justify-between items-center">
+                                    <div>
+                                        <div class="text-xl font-black text-white">${item.ticket}</div>
+                                        <div class="text-xs text-slate-400 truncate max-w-[180px]">${item.location}</div>
+                                    </div>
+                                    <div class="text-xs text-slate-500 font-mono">${item.time}</div>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                </footer>
+            `;
+            startClock();
+        }
+
+        function startClock() {
+            setInterval(() => {
+                const clockEl = document.getElementById('tvClock');
+                if (clockEl) {
+                    const now = new Date();
+                    clockEl.innerText = now.toLocaleTimeString();
+                }
+            }, 1000);
+        }
+
+        function showNotification(message, type) {
+            playChime();
+            const notif = document.createElement('div');
+            notif.className = `fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-white font-bold flex items-center space-x-3 transition-all transform translate-y-10 opacity-0 ${type === 'error' ? 'bg-rose-600' : 'bg-emerald-600'}`;
+            notif.innerHTML = `<span>${type === 'error' ? '⚠️' : '✅'}</span><span>${message}</span>`;
+            document.body.appendChild(notif);
+
+            setTimeout(() => { notif.classList.remove('translate-y-10', 'opacity-0'); }, 50);
+            setTimeout(() => {
+                notif.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+
+        function playChime() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.8);
+            } catch(e) {}
+        }
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'hospital_call_state') {
+                loadState();
+                if (state.view === 'tv') renderTV();
+                else if (state.view === 'operator' && document.getElementById('ticketInput') === null) renderOperator();
+            }
+        });
+
+        window.onload = function() {
+            loadState();
+            if (state.view === 'operator') {
+                renderOperator();
+            } else if (state.view === 'tv') {
+                renderTV();
+            } else {
+                renderSelector();
+            }
+        }
+    </script>
 </body>
 </html>
