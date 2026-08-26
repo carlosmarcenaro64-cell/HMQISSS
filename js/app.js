@@ -8,6 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMsg = document.getElementById('error-msg');
     const logoutBtn = document.getElementById('logout-btn');
 
+    // Verificar si ya existe una sesión activa al cargar la página (F5)
+    const sesionActiva = localStorage.getItem('hmq_sesion_activa');
+
+    if (sesionActiva === 'true') {
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+    }
+
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -15,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const pass = document.getElementById('password').value.trim();
 
             if (user === USER_VALIDO && pass === PASS_VALIDO) {
+                // Guardar estado en el navegador
+                localStorage.setItem('hmq_sesion_activa', 'true');
+
                 errorMsg.style.display = 'none';
                 loginSection.classList.add('hidden');
                 dashboardSection.classList.remove('hidden');
@@ -30,6 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
+            // Eliminar estado del navegador al presionar Salir
+            localStorage.removeItem('hmq_sesion_activa');
+
             dashboardSection.classList.add('hidden');
             loginSection.classList.remove('hidden');
             loginForm.reset();
