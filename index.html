@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Llamados - Hospital</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -20,12 +23,18 @@
     <div id="app" class="flex-1 flex flex-col"></div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycblzar7aNPOpi7ym0DzigrnFxloogmUuhLqzivAYQXJJSnJLWa4JGDnLYZ3xMbSjbyw/exec';
-
-        let state = {
-            view: 'selector'
+        // Configuración de Firebase (Gratuita y en tiempo real)
+        const firebaseConfig = {
+            databaseURL: "https://TU-PROYECTO-DEFAULT-RTDBS.firebaseio.com" // Reemplace con su URL de Firebase Realtime Database
         };
+        
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const dbRef = firebase.database().ref('turno_actual');
 
+        let state = { view: 'selector' };
         let currentSelectedDestination = 'Consultorio 01';
 
         function setMode(mode) {
@@ -39,14 +48,14 @@
             app.className = "flex-1 flex items-center justify-center p-4 md:p-6 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950";
             app.innerHTML = `
                 <div class="max-w-4xl w-full bg-slate-800/85 backdrop-blur-xl border border-slate-700 p-6 md:p-12 rounded-3xl shadow-2xl text-center">
-                    <h1 class="text-2xl md:text-5xl font-black text-white tracking-tight mb-4">Gestión de Turnos (Google Sheets)</h1>
+                    <h1 class="text-2xl md:text-5xl font-black text-white tracking-tight mb-4">Gestión de Turnos (Tiempo Real)</h1>
                     <p class="text-slate-400 text-sm md:text-lg mb-8 max-w-xl mx-auto">Selecciona el modo de uso para este dispositivo.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <button onclick="setMode('operator')" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white p-6 md:p-8 rounded-2xl shadow-xl text-left flex flex-col justify-between">
                             <div>
                                 <div class="text-2xl mb-4">📱</div>
                                 <h3 class="text-xl md:text-2xl font-bold mb-2">Control Remoto (Celular)</h3>
-                                <p class="text-blue-100 text-sm">Envía turnos directo a la hoja de cálculo.</p>
+                                <p class="text-blue-100 text-sm">Envía turnos instantáneos a las pantallas.</p>
                             </div>
                             <div class="mt-6 text-sm font-semibold text-blue-200">Abrir Control &rarr;</div>
                         </button>
@@ -54,7 +63,7 @@
                             <div>
                                 <div class="text-2xl mb-4">📺</div>
                                 <h3 class="text-xl md:text-2xl font-bold mb-2">Pantalla de Sala (TV)</h3>
-                                <p class="text-emerald-100 text-sm">Se actualiza automáticamente desde Sheets y emite voz.</p>
+                                <p class="text-emerald-100 text-sm">Se sincroniza al instante y emite voz.</p>
                             </div>
                             <div class="mt-6 text-sm font-semibold text-emerald-200">Iniciar TV &rarr;</div>
                         </button>
@@ -77,7 +86,7 @@
                 <header class="flex justify-between items-center bg-slate-800 border border-slate-700 px-4 py-3 rounded-2xl shadow-lg mb-4">
                     <div class="flex items-center space-x-2">
                         <span class="text-2xl">📱</span>
-                        <h2 class="text-base font-bold text-white">Control Remoto Cloud</h2>
+                        <h2 class="text-base font-bold text-white">Control Remoto Directo</h2>
                     </div>
                     <button onclick="setMode('selector')" class="px-3 py-1.5 bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Menú</button>
                 </header>
@@ -97,7 +106,7 @@
                                 ${consultoriosOptions}
                             </select>
                         </div>
-                        <button onclick="sendToSheet()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white font-black py-4 rounded-xl shadow-lg text-lg transition-transform active:scale-95">
+                        <button onclick="sendToCloud()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white font-black py-4 rounded-xl shadow-lg text-lg transition-transform active:scale-95">
                             📢 LLAMAR TURNO
                         </button>
                     </div>
@@ -105,7 +114,7 @@
             `;
         }
 
-        async function sendToSheet() {
+        function sendToCloud() {
             const ticketVal = document.getElementById('ticketInput').value.trim();
             const nameVal = document.getElementById('nameInput').value.trim();
             if (!ticketVal) { alert("Ingrese el turno"); return; }
@@ -120,19 +129,13 @@
                 time: timeString
             };
 
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                alert("¡Turno enviado a la nube con éxito!");
+            dbRef.set(payload).then(() => {
+                alert("¡Turno emitido a las pantallas!");
                 document.getElementById('ticketInput').value = '';
                 document.getElementById('nameInput').value = '';
-            } catch(e) {
+            }).catch(e => {
                 alert("Error al enviar el turno.");
-            }
+            });
         }
 
         function renderTV() {
@@ -143,8 +146,8 @@
                     <div class="flex items-center space-x-4">
                         <div class="bg-blue-600 text-white font-black px-4 py-2 rounded-xl text-xl shadow-lg">HMQ</div>
                         <div>
-                            <h1 class="text-2xl font-bold">Sala de Espera - Conectado a Google Sheets</h1>
-                            <p class="text-slate-400 text-sm">Actualización automática en tiempo real</p>
+                            <h1 class="text-2xl font-bold">Sala de Espera - Sincronizado en Vivo</h1>
+                            <p class="text-slate-400 text-sm">Actualización instantánea por WebSocket</p>
                         </div>
                     </div>
                     <div class="text-right">
@@ -167,27 +170,25 @@
                 </div>
             `;
             startClock();
-            pollSheetData();
-            setInterval(pollSheetData, 3000);
+            listenRealtimeData();
         }
 
-        let lastCheckedTicket = '';
-        async function pollSheetData() {
-            try {
-                const res = await fetch(SCRIPT_URL);
-                const data = await res.json();
-                
-                document.getElementById('tvCurrentTicket').innerText = data.ticket;
-                document.getElementById('tvCurrentName').innerText = data.name || '';
-                document.getElementById('tvCurrentLocation').innerText = data.location;
+        let lastCheckedKey = '';
+        function listenRealtimeData() {
+            dbRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
 
-                // Si hay un turno nuevo registrado en la hoja, emite la voz
-                const uniqueKey = data.ticket + "-" + data.time;
-                if (data.ticket !== '---' && uniqueKey !== lastCheckedTicket) {
-                    lastCheckedTicket = uniqueKey;
+                document.getElementById('tvCurrentTicket').innerText = data.ticket || '---';
+                document.getElementById('tvCurrentName').innerText = data.name || '';
+                document.getElementById('tvCurrentLocation').innerText = data.location || 'Esperando...';
+
+                const uniqueKey = (data.ticket || '') + "-" + (data.time || '');
+                if (data.ticket && data.ticket !== '---' && uniqueKey !== lastCheckedKey) {
+                    lastCheckedKey = uniqueKey;
                     speakCall(data.ticket, data.name, data.location);
                 }
-            } catch(e) {}
+            });
         }
 
         function speakCall(ticket, name, location) {
@@ -233,3 +234,4 @@
     </script>
 </body>
 </html>
+
