@@ -3,235 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Llamados - Hospital</title>
+    <title>Adivina la Palabra</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .pulse-soft { animation: pulseSoft 2s infinite; }
-        @keyframes pulseSoft {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+        .pop-animation {
+            animation: pop 0.2s ease-in-out;
+        }
+        @keyframes pop {
+            0% { transform: scale(0.9); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .shake-animation {
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 min-h-screen text-white flex flex-col justify-between items-center p-4">
 
-    <div id="app" class="flex-1 flex flex-col"></div>
+    <!-- Cabecera -->
+    <header class="w-full max-w-md text-center py-4">
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-yellow-300">
+            PALABRA SECRETA
+        </h1>
+        <p id="subtitle-info" class="text-xs md:text-sm text-indigo-200 mt-1">Adivina la palabra oculta</p>
+    </header>
 
-    <script>
-        // Configuración de Firebase (Gratuita y en tiempo real)
-        const firebaseConfig = {
-            databaseURL: "https://TU-PROYECTO-DEFAULT-RTDBS.firebaseio.com" // Reemplace con su URL de Firebase Realtime Database
-        };
+    <!-- Contenedor Principal del Juego -->
+    <main class="w-full max-w-md flex flex-col items-center gap-6 my-auto">
         
-        // Inicializar Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const dbRef = firebase.database().ref('turno_actual');
+        <!-- Pista Actual -->
+        <div id="hint-box" class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 py-2 text-center text-sm text-yellow-200 font-medium shadow-lg w-full">
+            💡 Pista: <span id="clue-text">Cargando pista...</span>
+        </div>
 
-        let state = { view: 'selector' };
-        let currentSelectedDestination = 'Consultorio 01';
+        <!-- Cuadrícula del Tablero (Se ajustará dinámicamente) -->
+        <div id="board" class="w-full max-w-[340px] mx-auto flex flex-col gap-2">
+            <!-- Las filas y celdas se generan dinámicamente mediante JS -->
+        </div>
 
-        function setMode(mode) {
-            state.view = mode;
-            if (mode === 'operator') renderOperator();
-            else renderTV();
-        }
+        <!-- Mensajes de Estado / Notificaciones -->
+        <div id="message-container" class="h-8 flex items-center justify-center">
+            <span id="game-message" class="text-sm font-semibold px-4 py-1 rounded-full bg-black/40 backdrop-blur text-pink-300 opacity-0 transition-opacity duration-300"></span>
+        </div>
 
-        function renderSelector() {
-            const app = document.getElementById('app');
-            app.className = "flex-1 flex items-center justify-center p-4 md:p-6 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950";
-            app.innerHTML = `
-                <div class="max-w-4xl w-full bg-slate-800/85 backdrop-blur-xl border border-slate-700 p-6 md:p-12 rounded-3xl shadow-2xl text-center">
-                    <h1 class="text-2xl md:text-5xl font-black text-white tracking-tight mb-4">Gestión de Turnos (Tiempo Real)</h1>
-                    <p class="text-slate-400 text-sm md:text-lg mb-8 max-w-xl mx-auto">Selecciona el modo de uso para este dispositivo.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <button onclick="setMode('operator')" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white p-6 md:p-8 rounded-2xl shadow-xl text-left flex flex-col justify-between">
-                            <div>
-                                <div class="text-2xl mb-4">📱</div>
-                                <h3 class="text-xl md:text-2xl font-bold mb-2">Control Remoto (Celular)</h3>
-                                <p class="text-blue-100 text-sm">Envía turnos instantáneos a las pantallas.</p>
-                            </div>
-                            <div class="mt-6 text-sm font-semibold text-blue-200">Abrir Control &rarr;</div>
-                        </button>
-                        <button onclick="setMode('tv')" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white p-6 md:p-8 rounded-2xl shadow-xl text-left flex flex-col justify-between">
-                            <div>
-                                <div class="text-2xl mb-4">📺</div>
-                                <h3 class="text-xl md:text-2xl font-bold mb-2">Pantalla de Sala (TV)</h3>
-                                <p class="text-emerald-100 text-sm">Se sincroniza al instante y emite voz.</p>
-                            </div>
-                            <div class="mt-6 text-sm font-semibold text-emerald-200">Iniciar TV &rarr;</div>
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
+        <!-- Teclado Virtual en Pantalla -->
+        <div id="keyboard" class="w-full flex flex-col gap-1.5 select-none">
+            <!-- Fila 1 -->
+            <div class="flex justify-center gap-1 w-full">
+                <button data-key="Q" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">Q</button>
+                <button data-key="W" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">W</button>
+                <button data-key="E" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">E</button>
+                <button data-key="R" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">R</button>
+                <button data-key="T" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">T</button>
+                <button data-key="Y" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">Y</button>
+                <button data-key="U" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">U</button>
+                <button data-key="I" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">I</button>
+                <button data-key="O" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">O</button>
+                <button data-key="P" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">P</button>
+            </div>
+            <!-- Fila 2 -->
+            <div class="flex justify-center gap-1 w-full px-4">
+                <button data-key="A" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">A</button>
+                <button data-key="S" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">S</button>
+                <button data-key="D" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">D</button>
+                <button data-key="F" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">F</button>
+                <button data-key="G" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">G</button>
+                <button data-key="H" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">H</button>
+                <button data-key="J" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">J</button>
+                <button data-key="K" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">K</button>
+                <button data-key="L" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">L</button>
+                <button data-key="Ñ" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">Ñ</button>
+            </div>
+            <!-- Fila 3 -->
+            <div class="flex justify-center gap-1 w-full">
+                <button data-key="ENTER" class="key-btn flex-[1.5] bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition font-bold py-3 rounded-lg text-xs md:text-sm shadow">ENTER</button>
+                <button data-key="Z" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">Z</button>
+                <button data-key="X" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">X</button>
+                <button data-key="C" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">C</button>
+                <button data-key="V" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">V</button>
+                <button data-key="B" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">B</button>
+                <button data-key="N" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">N</button>
+                <button data-key="M" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow">M</button>
+                <button data-key="BACK" class="key-btn flex-[1.5] bg-rose-600 hover:bg-rose-500 active:scale-95 transition font-bold py-3 rounded-lg text-xs md:text-sm shadow">⌫</button>
+            </div>
+        </div>
 
-        function renderOperator() {
-            const app = document.getElementById('app');
-            app.className = "flex-1 flex flex-col bg-slate-900 p-3 md:p-6 max-w-2xl mx-auto w-full";
+        <!-- Botón Reiniciar -->
+        <button id="restart-btn" onclick="initGame()" class="hidden bg-gradient-to-r from-pink-500 to-yellow-500 hover:opacity-90 active:scale-95 text-slate-950 font-bold px-8 py-3 rounded-xl shadow-lg transition">
+            Jugar Nuevamente
+        </button>
+
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="text-xs text-indigo-300/60 py-2">
+        Creado con estilo y diversión ✨
+    </footer>
+
+    <!-- Lógica del Juego -->
+    <script>
+        const wordsList = [
+            { word: "SOL", clue: "Estrella brillante que ilumina el día" },
+            { word: "CASA", clue: "Lugar donde vivimos y nos resguardamos" },
+            { word: "PERRO", clue: "El mejor amigo del hombre" },
+            { word: "PLAYA", clue: "Lugar con arena, sol y mar" },
+            { word: "LIBRO", clue: "Objeto lleno de historias y páginas" },
+            { word: "FUEGO", clue: "Elemento caliente que da luz y calor" },
+            { word: "NUBES", clue: "Acumulaciones de vapor en el cielo" },
+            { word: "ARBOL", clue: "Planta gigante con tronco y ramas" },
+            { word: "LUNA", clue: "Satélite natural que brilla de noche" },
+            { word: "MUSICA", clue: "Arte de combinar sonidos y ritmos" },
+            { word: "TIGRE", clue: "Felino salvaje con rayas naranjas y negras" },
+            { word: "AVION", clue: "Medio de transporte que vuela por el aire" },
+            { word: "PLANETA", clue: "Cuerpo celeste que gira alrededor de una estrella" }
+        ];
+
+        let selectedObj = {};
+        let secretWord = "";
+        let currentGuess = "";
+        let currentRow = 0;
+        let isGameOver = false;
+        const totalRows = 6;
+        let wordLength = 5;
+
+        const boardEl = document.getElementById("board");
+        const clueTextEl = document.getElementById("clue-text");
+        const subtitleInfoEl = document.getElementById("subtitle-info");
+        const messageEl = document.getElementById("game-message");
+        const restartBtn = document.getElementById("restart-btn");
+
+        function initGame() {
+            // Seleccionar palabra aleatoria
+            selectedObj = wordsList[Math.floor(Math.random() * wordsList.length)];
+            secretWord = selectedObj.word;
+            wordLength = secretWord.length;
             
-            let consultoriosOptions = '';
-            for(let i = 1; i <= 12; i++) {
-                const name = `Consultorio ${i < 10 ? '0'+i : i}`;
-                consultoriosOptions += `<option value="${name}" ${currentSelectedDestination === name ? 'selected' : ''}>🚪 ${name}</option>`;
-            }
+            clueTextEl.textContent = selectedObj.clue;
+            subtitleInfoEl.textContent = `Adivina la palabra oculta de ${wordLength} letras en 6 intentos`;
+            
+            currentGuess = "";
+            currentRow = 0;
+            isGameOver = false;
+            
+            messageEl.style.opacity = "0";
+            restartBtn.classList.add("hidden");
 
-            app.innerHTML = `
-                <header class="flex justify-between items-center bg-slate-800 border border-slate-700 px-4 py-3 rounded-2xl shadow-lg mb-4">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-2xl">📱</span>
-                        <h2 class="text-base font-bold text-white">Control Remoto Directo</h2>
-                    </div>
-                    <button onclick="setMode('selector')" class="px-3 py-1.5 bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">Menú</button>
-                </header>
-                <div class="space-y-4 flex-1 flex flex-col justify-between">
-                    <div class="bg-slate-800/90 border border-slate-700 p-4 md:p-6 rounded-2xl shadow-xl space-y-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Número de Turno</label>
-                            <input type="text" id="ticketInput" placeholder="Ej. A-012" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-lg font-black uppercase focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Nombre del Paciente (Opcional)</label>
-                            <input type="text" id="nameInput" placeholder="Ej. Juan Pérez" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Destino</label>
-                            <select id="mobileDestSelect" onchange="currentSelectedDestination = this.value" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-bold focus:outline-none focus:border-blue-500">
-                                ${consultoriosOptions}
-                            </select>
-                        </div>
-                        <button onclick="sendToCloud()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white font-black py-4 rounded-xl shadow-lg text-lg transition-transform active:scale-95">
-                            📢 LLAMAR TURNO
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function sendToCloud() {
-            const ticketVal = document.getElementById('ticketInput').value.trim();
-            const nameVal = document.getElementById('nameInput').value.trim();
-            if (!ticketVal) { alert("Ingrese el turno"); return; }
-
-            const now = new Date();
-            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            const payload = {
-                ticket: ticketVal.toUpperCase(),
-                name: nameVal,
-                location: currentSelectedDestination,
-                time: timeString
-            };
-
-            dbRef.set(payload).then(() => {
-                alert("¡Turno emitido a las pantallas!");
-                document.getElementById('ticketInput').value = '';
-                document.getElementById('nameInput').value = '';
-            }).catch(e => {
-                alert("Error al enviar el turno.");
-            });
-        }
-
-        function renderTV() {
-            const app = document.getElementById('app');
-            app.className = "flex-1 flex flex-col bg-slate-950 text-white p-6 justify-between";
-            app.innerHTML = `
-                <header class="flex justify-between items-center border-b border-slate-800 pb-4">
-                    <div class="flex items-center space-x-4">
-                        <div class="bg-blue-600 text-white font-black px-4 py-2 rounded-xl text-xl shadow-lg">HMQ</div>
-                        <div>
-                            <h1 class="text-2xl font-bold">Sala de Espera - Sincronizado en Vivo</h1>
-                            <p class="text-slate-400 text-sm">Actualización instantánea por WebSocket</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div id="tvClock" class="text-3xl font-black text-blue-400">00:00:00</div>
-                        <button onclick="setMode('selector')" class="text-xs text-slate-500 hover:text-slate-300 mt-1">Configuración</button>
-                    </div>
-                </header>
-                <div class="my-auto py-8">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-slate-900 border-2 border-blue-500/50 rounded-3xl p-8 lg:p-12 shadow-2xl pulse-soft">
-                        <div class="text-center lg:text-left border-b lg:border-b-0 lg:border-r border-blue-500/30 pb-6 lg:pr-8">
-                            <span class="text-blue-400 font-bold uppercase text-sm block mb-2">TURNO ACTUAL</span>
-                            <div id="tvCurrentTicket" class="text-6xl md:text-8xl font-black text-white">---</div>
-                            <div id="tvCurrentName" class="text-2xl md:text-3xl font-bold text-slate-200 mt-2"></div>
-                        </div>
-                        <div class="text-center lg:text-left">
-                            <span class="text-emerald-400 font-bold uppercase text-sm block mb-2">DESTINO</span>
-                            <div id="tvCurrentLocation" class="text-4xl md:text-6xl font-black text-emerald-300">Esperando...</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            startClock();
-            listenRealtimeData();
-        }
-
-        let lastCheckedKey = '';
-        function listenRealtimeData() {
-            dbRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
-
-                document.getElementById('tvCurrentTicket').innerText = data.ticket || '---';
-                document.getElementById('tvCurrentName').innerText = data.name || '';
-                document.getElementById('tvCurrentLocation').innerText = data.location || 'Esperando...';
-
-                const uniqueKey = (data.ticket || '') + "-" + (data.time || '');
-                if (data.ticket && data.ticket !== '---' && uniqueKey !== lastCheckedKey) {
-                    lastCheckedKey = uniqueKey;
-                    speakCall(data.ticket, data.name, data.location);
+            // Resetear colores del teclado virtual
+            document.querySelectorAll(".key-btn").forEach(btn => {
+                if (btn.dataset.key !== "ENTER" && btn.dataset.key !== "BACK") {
+                    btn.className = "key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow";
                 }
             });
+
+            buildBoard();
         }
 
-        function speakCall(ticket, name, location) {
-            playChime();
-            if ('speechSynthesis' in window) {
-                setTimeout(() => {
-                    let text = `Turno ${ticket}.`;
-                    if (name) text += ` Paciente ${name}.`;
-                    text += ` Dirigirse a ${location}.`;
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'es-ES';
-                    utterance.rate = 0.95;
-                    window.speechSynthesis.speak(utterance);
-                }, 600);
+        function buildBoard() {
+            boardEl.innerHTML = "";
+            for (let r = 0; r < totalRows; r++) {
+                const rowDiv = document.createElement("div");
+                rowDiv.className = `grid grid-cols-${wordLength} gap-2 w-full`;
+                // Asignar estilo en línea de columnas dinámicas para asegurar compatibilidad exacta con Tailwind
+                rowDiv.style.gridTemplateColumns = `repeat(${wordLength}, minmax(0, 1fr))`;
+
+                for (let c = 0; c < wordLength; c++) {
+                    const cell = document.createElement("div");
+                    // Altura y proporción dinámica basada en la cantidad de letras
+                    cell.className = "border-2 border-white/20 rounded-xl aspect-square flex items-center justify-center text-lg md:text-2xl font-bold uppercase bg-white/5 transition-all duration-300";
+                    cell.id = `cell-${r}-${c}`;
+                    rowDiv.appendChild(cell);
+                }
+                boardEl.appendChild(rowDiv);
             }
         }
 
-        function startClock() {
-            setInterval(() => {
-                const clockEl = document.getElementById('tvClock');
-                if (clockEl) clockEl.innerText = new Date().toLocaleTimeString();
-            }, 1000);
+        function showMessage(text, duration = 2000) {
+            messageEl.textContent = text;
+            messageEl.style.opacity = "1";
+            if (duration) {
+                setTimeout(() => {
+                    messageEl.style.opacity = "0";
+                }, duration);
+            }
         }
 
-        function playChime() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.8);
-            } catch(e) {}
+        function handleKeyPress(key) {
+            if (isGameOver) return;
+
+            if (key === "ENTER") {
+                if (currentGuess.length !== wordLength) {
+                    showMessage("Faltan letras");
+                    shakeCurrentRow();
+                    return;
+                }
+                checkGuess();
+            } else if (key === "BACK") {
+                if (currentGuess.length > 0) {
+                    currentGuess = currentGuess.slice(0, -1);
+                    updateBoardUI();
+                }
+            } else {
+                if (currentGuess.length < wordLength && /^[A-ZÑ]$/.test(key)) {
+                    currentGuess += key;
+                    updateBoardUI();
+                    popCurrentCell();
+                }
+            }
         }
 
-        window.onload = function() { renderSelector(); }
+        function updateBoardUI() {
+            for (let c = 0; c < wordLength; c++) {
+                const cell = document.getElementById(`cell-${currentRow}-${c}`);
+                if (c < currentGuess.length) {
+                    cell.textContent = currentGuess[c];
+                    cell.classList.add("border-white/60");
+                } else {
+                    cell.textContent = "";
+                    cell.classList.remove("border-white/60");
+                }
+            }
+        }
+
+        function popCurrentCell() {
+            if (currentGuess.length > 0) {
+                const cell = document.getElementById(`cell-${currentRow}-${currentGuess.length - 1}`);
+                cell.classList.add("pop-animation");
+                setTimeout(() => cell.classList.remove("pop-animation"), 200);
+            }
+        }
+
+        function shakeCurrentRow() {
+            for (let c = 0; c < wordLength; c++) {
+                const cell = document.getElementById(`cell-${currentRow}-${c}`);
+                cell.classList.add("shake-animation");
+                setTimeout(() => cell.classList.remove("shake-animation"), 400);
+            }
+        }
+
+        function checkGuess() {
+            const guess = currentGuess;
+            const secretArr = secretWord.split("");
+            const guessArr = guess.split("");
+            const status = Array(wordLength).fill("absent");
+
+            // Primero verificar aciertos exactos (Verde)
+            for (let i = 0; i < wordLength; i++) {
+                if (guessArr[i] === secretArr[i]) {
+                    status[i] = "correct";
+                    secretArr[i] = null;
+                }
+            }
+
+            // Segundo verificar letras presentes en otro lugar (Amarillo)
+            for (let i = 0; i < wordLength; i++) {
+                if (status[i] !== "correct") {
+                    const index = secretArr.indexOf(guessArr[i]);
+                    if (index > -1) {
+                        status[i] = "present";
+                        secretArr[index] = null;
+                    }
+                }
+            }
+
+            // Aplicar colores en las celdas con animación secuencial
+            for (let i = 0; i < wordLength; i++) {
+                const cell = document.getElementById(`cell-${currentRow}-${i}`);
+                const letter = guessArr[i];
+                const keyBtn = document.querySelector(`[data-key="${letter}"]`);
+
+                setTimeout(() => {
+                    if (status[i] === "correct") {
+                        cell.className = "border-2 border-emerald-500 bg-emerald-500 text-white rounded-xl aspect-square flex items-center justify-center text-lg md:text-2xl font-bold uppercase transition-all duration-300";
+                        if (keyBtn && !keyBtn.classList.contains("bg-emerald-600")) {
+                            keyBtn.className = "key-btn flex-1 bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow text-white";
+                        }
+                    } else if (status[i] === "present") {
+                        cell.className = "border-2 border-amber-500 bg-amber-500 text-slate-950 rounded-xl aspect-square flex items-center justify-center text-lg md:text-2xl font-bold uppercase transition-all duration-300";
+                        if (keyBtn && !keyBtn.classList.contains("bg-emerald-600") && !keyBtn.classList.contains("bg-amber-600")) {
+                            keyBtn.className = "key-btn flex-1 bg-amber-600 hover:bg-amber-500 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow text-white";
+                        }
+                    } else {
+                        cell.className = "border-2 border-slate-600 bg-slate-700/50 text-white/50 rounded-xl aspect-square flex items-center justify-center text-lg md:text-2xl font-bold uppercase transition-all duration-300";
+                        if (keyBtn && !keyBtn.classList.contains("bg-emerald-600") && !keyBtn.classList.contains("bg-amber-600")) {
+                            keyBtn.className = "key-btn flex-1 bg-slate-700 hover:bg-slate-600 active:scale-95 transition font-bold py-3 rounded-lg text-sm md:text-base shadow text-white/50";
+                        }
+                    }
+                }, i * 200);
+            }
+
+            // Comprobar Victoria o Derrota
+            setTimeout(() => {
+                if (guess === secretWord) {
+                    showMessage("🎉 ¡Felicidades, ganaste!", 0);
+                    isGameOver = true;
+                    restartBtn.classList.remove("hidden");
+                    return;
+                }
+
+                currentRow++;
+                currentGuess = "";
+
+                if (currentRow === totalRows) {
+                    showMessage(`❌ ¡Juego terminado! Era: ${secretWord}`, 0);
+                    isGameOver = true;
+                    restartBtn.classList.remove("hidden");
+                }
+            }, wordLength * 200);
+        }
+
+        // Eventos de Teclado Físico
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                handleKeyPress("ENTER");
+            } else if (e.key === "Backspace") {
+                handleKeyPress("BACK");
+            } else {
+                const key = e.key.toUpperCase();
+                if (/^[A-ZÑ]$/.test(key)) {
+                    handleKeyPress(key);
+                }
+            }
+        });
+
+        // Eventos de Teclado Virtual en Pantalla
+        document.querySelectorAll(".key-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const key = btn.dataset.key;
+                handleKeyPress(key);
+            });
+        });
+
+        // Inicializar el juego al cargar
+        window.onload = initGame;
     </script>
 </body>
 </html>
-
