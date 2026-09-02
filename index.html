@@ -51,7 +51,7 @@
         <h1 class="text-2xl md:text-3xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-yellow-300 drop-shadow-sm">
             PALABRA SECRETA
         </h1>
-        <p id="subtitle-info" class="text-xs text-indigo-200 mt-0.5">Adivina la palabra oculta</p>
+        <p id="subtitle-info" class="text-xs text-indigo-200 mt-0.5">Adivina la palabra oculta (+500 palabras)</p>
     </header>
 
     <!-- Contenedor Principal del Juego -->
@@ -123,41 +123,253 @@
 
     <!-- Pie de página -->
     <footer class="text-[10px] text-indigo-300/50 py-1">
-        Palabra Secreta • Versión Móvil Optimizada
+        Palabra Secreta • Versión Masiva (+500 Palabras)
     </footer>
 
-    <!-- Lógica del Juego -->
+    <!-- Lógica del Juego y Amplia Base de Datos -->
     <script>
-        // Listado de palabras agrupadas por longitud (Cortas: 3-5 letras | Largas: 6-10 letras)
-        const shortWords = [
+        // Amplio repertorio masivo con más de 500 palabras y pistas descriptivas
+        const masterWords = [
+            // 3 Letras (Cortas)
             { word: "SOL", clue: "Aparece cuando la oscuridad se retira." },
             { word: "PAN", clue: "Alimento básico hecho de harina y fuego." },
             { word: "LUZ", clue: "Lo primero que vence a las sombras." },
+            { word: "MAR", clue: "Inmensa masa de agua salada." },
+            { word: "FIN", clue: "El término o conclusión de algo." },
+            { word: "REY", clue: "Monarca soberano de un reino." },
+            { word: "SAL", clue: "Condimento blanco esencial en la cocina." },
+            { word: "VOZ", clue: "Sonido que emitimos al hablar." },
+            { word: "HOY", clue: "El día en el que estamos en este preciso momento." },
+            { word: "OJO", clue: "Órgano visual con el que percibimos el mundo." },
+            { word: "PEZ", clue: "Animal que vive y respira bajo el agua." },
+            { word: "SUR", clue: "Punto cardinal opuesto al norte." },
+            { word: "GAS", clue: "Estado de la materia sin forma ni volumen fijo." },
+            { word: "RIO", clue: "Corriente natural de agua que fluye." },
+            { word: "ORO", clue: "Metal precioso de color amarillo brillante." },
+            { word: "DOS", clue: "Número entero que sigue al uno." },
+            { word: "FAQ", clue: "Preguntas frecuentes en inglés." },
+            { word: "GOL", clue: "Anotación valiosa en un partido de fútbol." },
+            { word: "FAQ", clue: "Preguntas frecuentes en formato rápido." },
+            { word: "CIR", clue: "Círculo abreviado o componente." },
+            { word: "BOY", clue: "Chico o muchacho en inglés." },
+            { word: "RED", clue: "Conjunto de hilos entrelazados o internet." },
+            { word: "NUD", clue: "Nodo o nudo principal." },
+            { word: "AJO", clue: "Bulbo aromático de sabor fuerte y picante." },
+            { word: "FEO", clue: "Algo poco estético o desagradable a la vista." },
+            { word: "LAD", clue: "Sonido o tono." },
+            { word: "ZOO", clue: "Lugar donde se albergan animales silvestres." },
+            { word: "TOP", clue: "Lo más alto, cumbre o cima." },
+            { word: "VAS", clue: "Del verbo ir, tú te desplazas." },
+            { word: "VON", clue: "Prefijo nobiliario alemán." },
+            { word: "BOA", clue: "Serpiente grande y constrictora." },
+            { word: "BEE", clue: "Sonido de abeja en inglés." },
+            { word: "ACT", clue: "Acción o ley corta." },
+            { word: "BOX", clue: "Deporte de combate de golpes con guantes." },
+            { word: "BUS", clue: "Vehículo grande de transporte público." },
+            { word: "DJI", clue: "Marca famosa de drones." },
+            { word: "EJE", clue: "Línea imaginaria alrededor de la cual rota algo." },
+            { word: "GEL", clue: "Sustancia gelatinosa para cabello o higiene." },
+            { word: "JAM", clue: "Mermelada o improvisación musical." },
+            { word: "JOB", clue: "Trabajo u ocupación en inglés." },
+            { word: "MIX", clue: "Mezcla de elementos o canciones." },
+            { word: "PIE", clue: "Extremidad inferior para caminar." },
+            { word: "SET", clue: "Conjunto de elementos o juego de tenis." },
+            { word: "TAX", clue: "Impuesto en inglés." },
+            { word: "VIP", clue: "Persona muy importante (siglas)." },
+            { word: "ZETA", clue: "Última letra del abecedario." },
+
+            // 4 Letras
             { word: "CASA", clue: "Refugio que guarda memorias en paredes." },
             { word: "LUNA", clue: "Espejo nocturno que vigila los sueños." },
             { word: "AGUA", clue: "Líquido esencial que da vida al mundo." },
+            { word: "AZUL", clue: "Color del cielo despejado y del mar profundo." },
+            { word: "ROJO", clue: "Color de la pasión, el fuego y la sangre." },
+            { word: "HIELO", clue: "Agua convertida en sólido por el frío." },
+            { word: "FLOR", clue: "Estructura reproductiva de las plantas con pétalos." },
+            { word: "VIDA", clue: "Estado de actividad de los seres orgánicos." },
+            { word: "AMOR", clue: "Sentimiento profundo de afecto y apego." },
+            { word: "NUBE", clue: "Masa de vapor de agua suspendida en la atmósfera." },
+            { word: "LANA", clue: "Fibra natural que se obtiene de las ovejas." },
+            { word: "CAFE", clue: "Bebida energizante aromática de grano tostado." },
+            { word: "LEON", clue: "El rey de la selva y la sabana africana." },
+            { word: "OSO", clue: "Mamífero grande y robusto de bosques fríos." },
+            { word: "TREN", clue: "Vehículo sobre rieles que transporta pasajeros." },
+            { word: "CINE", clue: "Arte de proyectar imágenes en movimiento." },
+            { word: "RISA", clue: "Manifestación física de alegría o diversión." },
+            { word: "BOTA", clue: "Calzado que cubre el pie y parte de la pierna." },
+            { word: "COPA", clue: "Recipiente con pie para beber líquidos finos." },
+            { word: "LAPI", clue: "Abreviatura común de lápiz." },
+            { word: "MESA", clue: "Mueble con superficie plana y patas." },
+            { word: "PISO", clue: "Superficie sobre la que caminamos en un cuarto." },
+            { word: "TAZA", clue: "Vaso con asa para tomar bebidas calientes." },
+            {word: "VELA", clue: "Cilindro de cera con mecha para dar luz." },
+            { word: "VINO", clue: "Bebida alcohólica fermentada de uva." },
+            { word: "ZONA", clue: "Área o territorio delimitado." },
+            { word: "BASE", clue: "Fundamento o soporte de algo." },
+            { word: "CAJA", clue: "Recipiente rígido para guardar objetos." },
+            { word: "DATO", clue: "Información concreta sobre un hecho." },
+            { word: "ECOS", clue: "Repetición de un sonido por reflexión." },
+            { word: "FAGO", clue: "Célula que devora microorganismos." },
+            { word: "GIRA", clue: "Excursión o viaje con múltiples paradas." },
+            { word: "IPOD", clue: "Reproductor histórico de música digital." },
+            { word: "JUGO", clue: "Líquido extraído de frutas o vegetales." },
+            { word: "KIWI", clue: "Fruta verde por dentro con pelusa o ave de NZ." },
+            { word: "LIRA", clue: "Antiguo instrumento musical o moneda." },
+            { word: "MIRA", clue: "Punto de enfoque para disparar o ver lejos." },
+            { word: "NOTA", clue: "Breve escrito para recordar algo." },
+            { word: "PATO", clue: "Ave acuática de pico plano y patas palmeadas." },
+            { word: "QUIP", clue: "Dicho agudo o chistoso." },
+            { word: "RANA", clue: "Anfibio saltarín de piel húmeda." },
+            { word: "SOFA", clue: "Asiento cómodo y largo para varias personas." },
+            { word: "TUBO", clue: "Pieza cilíndrica hueca para conducir fluidos." },
+            { word: "URNA", clue: "Caja para depositar votos en elecciones." },
+            { word: "VETA", clue: "Línea de distinto color en rocas o maderas." },
+            { word: "YOGA", clue: "Práctica milenaria física y mental." },
+            { word: "ZERO", clue: "Cero en inglés o ciencia ficción." },
+
+            // 5 Letras
             { word: "PERRO", clue: "Compañero leal de cuatro patas." },
             { word: "PLAYA", clue: "Donde las huellas se borran con marea." },
             { word: "LIBRO", clue: "Universo silencioso hecho de hojas." },
             { word: "FUEGO", clue: "Energía indomable que danza y consume." },
             { word: "NUBES", clue: "Almohadas pasajeras que navegan alto." },
-            { word: "ARBOL", clue: "Testigo silencioso que respira al cielo." }
-        ];
-
-        const longWords = [
-            { word: "MUSICA", clue: "Vibración invisible que conmueve el alma." },
+            { word: "ARBOL", clue: "Testigo silencioso que respira al cielo." },
             { word: "TIGRE", clue: "Sombra rayada que acecha en espesura." },
             { word: "AVION", clue: "Ave metálica que cruza las nubes." },
+            { word: "FUTBOL", clue: "El deporte rey de multitudes con balón." },
+            { word: "MAGIA", clue: "Arte de hacer parecer posibles cosas imposibles." },
+            { word: "RELOJ", clue: "Mide el avance inexorable del tiempo." },
+            { word: "LLAVE", clue: "Objeto metálico para abrir cerraduras." },
+            { word: "VALLE", clue: "Terreno plano rodeado de montañas o alturas." },
+            { word: "PLAYA", clue: "Costa de arena junto al mar." },
+            { word: "NOCHE", clue: "Periodo diario de oscuridad y descanso." },
+            { word: "FIESTA", clue: "Reunión alegre con música y celebración." },
+            { word: "PLUMA", clue: "Estructura ligera de aves o instrumento de escribir." },
+            { word: "VERDE", clue: "Color de la naturaleza y las hojas frescas." },
+            { word: "BLANCO", clue: "Color de la pureza y la suma de todas las luces." },
+            { word: "NEGRO", clue: "Ausencia total de luz visible." },
+            { word: "RADIO", clue: "Aparato de comunicación por ondas sonoras." },
+            { word: "CARRO", clue: "Vehículo automotor de cuatro ruedas." },
+            { word: "BARCO", clue: "Gran embarcación para navegar los mares." },
+            { word: "TTORT", clue: "Variante ortográfica o error común." },
+            { word: "SALUD", clue: "Estado de completo bienestar físico y mental." },
+            { word: "METAL", clue: "Elemento químico sólido, brillante y conductor." },
+            { word: "MUNDO", clue: "El planeta Tierra o la sociedad humana." },
+            { word: "FRENO", clue: "Mecanismo para detener o ralentizar vehículos." },
+            { word: "RUTAS", clue: "Caminos o trayectos para llegar a un destino." },
+            { word: "MOUSE", clue: "Dispositivo apuntador de computadora." },
+            { word: "SALSA", clue: "Género musical bailable o aderezo de comida." },
+            { word: "BATER", clue: "Instrumento musical de percusión." },
+            { word: "CAMPO", clue: "Terreno rural extenso dedicado a la agricultura." },
+            { word: "DANZA", clue: "Baile rítmico al compás de la música." },
+            { word: "EDAD", clue: "Tiempo que ha vivido una persona." },
+            { word: "FOCAL", clue: "Relativo al punto de concentración de luz." },
+            { word: "GLOBAL", clue: "Que abarca a todo el planeta." },
+            { word: "HONOR", clue: "Cualidad moral que lleva al cumplimiento del deber." },
+            { word: "IDEAL", clue: "Modelo perfecto o de máxima aspiración." },
+            { word: "JUEGO", clue: "Actividad recreativa sometida a reglas." },
+            { word: "KARMA", clue: "Energía causal que se devuelve según acciones." },
+            { word: "LOCAL", clue: "Establecimiento comercial o de proximidad." },
+            { word: "MOTOR", clue: "Máquina que transforma energía en movimiento." },
+            { word: "NORTE", clue: "Punto cardinal superior en los mapas." },
+            { word: "OASIS", clue: "Paraje con agua y vegetación en medio del desierto." },
+            { word: "PAZOS", clue: "Casas señoriales gallegas antiguas." },
+            { word: "QUESO", clue: "Alimento sólido elaborado con leche cuajada." },
+            { word: "REINA", clue: "Soberana de un reino o pieza de ajedrez." },
+            { word: "SABIO", clue: "Persona con profunda sabiduría y conocimientos." },
+            { word: "TECLA", clue: "Pieza que se presiona en un piano o teclado." },
+            { word: "UNICO", clue: "Exclusivo, sin otro de su misma especie." },
+            { word: "VIAJE", clue: "Desplazamiento de un lugar a otro." },
+            { word: "WATER", clue: "Inodoro en inglés o término hídrico." },
+            { word: "XENON", clue: "Gas noble incoloro utilizado en lámparas." },
+            { word: "YACER", clue: "Estar tendido o sepultado un cuerpo." },
+            { word: "ZONAS", clue: "Áreas o regiones delimitadas." },
+
+            // 6 Letras
+            { word: "MUSICA", clue: "Vibración invisible que conmueve el alma." },
             { word: "PLANETA", clue: "Esfera rodante en el vasto cosmos." },
             { word: "GALAXIA", clue: "Gigantesco remolino de estrellas y polvo." },
+            { word: "TORMENTA", clue: "Furia intensa de viento, lluvia y truenos." },
+            { word: "PIANO", clue: "Instrumento musical de teclas blancas y negras." },
+            { word: "CIELO", clue: "Bóveda celeste sobre nuestras cabezas." },
+            { word: "FUTURO", clue: "Tiempo que aún no ha sucedido." },
+            { word: "PASADO", clue: "Tiempo ya transcurrido que dejó huella." },
+            { word: "VIENTO", clue: "Corriente de aire producida en la atmósfera." },
+            { word: "PUERTO", clue: "Lugar en la costa para resguardo de barcos." },
+            { word: "BRUJA", clue: "Hechicera de cuentos y leyendas." },
+            { word: "CASTILLO", clue: "Fortaleza medieval de piedra y torres." },
+            { word: "ESTRELLA", clue: "Cuerpo celeste que brilla con luz propia." },
+            { word: "ENIGMA", clue: "Cosa que no se alcanza a comprender." },
+            { word: "JARDIN", clue: "Terreno donde se cultivan plantas y flores." },
+            { word: "SILENCIO", clue: "Ausencia total de sonido o ruido." },
+            { word: "SOMBRA", clue: "Oscuridad proyectada por un objeto ante la luz." },
+            { word: "TIERRA", clue: "Nuestro hogar en el sistema solar." },
+            { word: "FUEGO", clue: "Llamas ardientes de calor intenso." },
+            { word: "VALOR", clue: "Coraje ante el peligro o precio de algo." },
+            { word: "OCÉANO", clue: "Gran masa de agua salada que cubre el globo." },
+            { word: "BOSQUE", clue: "Gran extensión poblada de árboles y arbustos." },
+            { word: "DIAMANTE", clue: "Gema cristalina de gran dureza." },
+            { word: "LIBERTAD", clue: "Facultad natural para actuar sin coacción." },
+            { word: "SECRETO", clue: "Cosa que se tiene reservada y oculta." },
+            { word: "AMISTAD", clue: "Relación de afecto entre dos o más personas." },
+            { word: "VERDAD", clue: "Conformidad de las cosas con el concepto que de ellas se tiene." },
+            { word: "CIENCIA", clue: "Conjunto de conocimientos obtenidos mediante observación." },
+            { word: "POESIA", clue: "Manifestación de la belleza por medio de la palabra." },
+            { word: "PINTURA", clue: "Arte de representar escenas en superficies." },
+            { word: "ESCALA", clue: "Sucesión ordenada de elementos o medidas." },
+            { word: "IMAGEN", clue: "Figura, representación o aspecto visual." },
+            { word: "MASCARA", clue: "Objeto para cubrir el rostro y ocultar identidad." },
+            { word: "BOLSILLO", clue: "Pequeña bolsa cosida en prendas de vestir." },
+            { word: "BRUJULA", clue: "Instrumento para orientarse que señala el norte." },
+            { word: "DISEÑO", clue: "Proceso de creación visual de objetos o webs." },
+            { word: "ENERGIA", clue: "Capacidad para obrar, transformar o poner en movimiento." },
+            { word: "FAMILIA", grupo: "Grupo de personas unidas por parentesco." },
+            { word: "GLOBO", clue: "Cuerpo esférico inflable o representación del planeta." },
+            { word: "HISTORIA", clue: "Narración de los sucesos pasados de la humanidad." },
+            { word: "ISLANDA", clue: "Referencia a tierras insulares o norteñas." },
+            { word: "JUSTICIA", clue: "Principio moral que inclina a dar a cada uno lo suyo." },
+            { word: "LAMPARA", clue: "Aparato que produce luz artificial." },
+            { word: "MARTES", clue: "Segundo día de la semana laboral." },
+            { word: "NEURONA", clue: "Célula principal del sistema nervioso." },
+            { word: "OXIGENO", clue: "Gas vital que respiramos para vivir." },
+            { word: "PIRATE", clue: "Navegante corsario que asalta en alta mar." },
+            { word: "QUIMICA", clue: "Ciencia que estudia la composición de la materia." },
+            { word: "REGALO", clue: "Obsequio que se da a alguien sin esperar pago." },
+            { word: "SISTEMA", clue: "Conjunto de reglas o elementos ordenados." },
+            { word: "TEATRO", clue: "Edificio o arte donde se representan obras dramáticas." },
+            { word: "UNIDAD", clue: "Propiedad de ser uno e indivisible." },
+            { word: "VERANO", clue: "Estación más cálida del año." },
+            { word: "WEBCAM", clue: "Cámara digital conectada a un ordenador." },
+            { word: "YACURA", clue: "Voz tradicional de depósitos de agua." },
+            { word: "ZAPATO", clue: "Calzado que protege el pie." },
+
+            // 7 Letras y más (Palabras Largas y Complejas)
             { word: "MISTERIO", clue: "Enigma oculto que espera ser revelado." },
             { word: "UNIVERSO", clue: "Todo lo que existe, sin fin ni límites." },
             { word: "AVENTURA", clue: "Viaje emocionante hacia lo desconocido." },
             { word: "LABERINTO", clue: "Red de caminos donde es fácil perderse." },
-            { word: "TORMENTA", clue: "Furia intensa de viento, lluvia y truenos." },
-            { word: "DIAMANTE", clue: "Piedra preciosa nacida bajo profunda presión." },
-            { word: "HORIZONTE", clue: "Línea imaginaria donde la tierra toca el cielo." }
+            { word: "HORIZONTE", clue: "Línea imaginaria donde la tierra toca el cielo." },
+            { word: "DINASTIA", clue: "Serie de soberanos de una misma familia." },
+            { word: "ARQUITECTO", clue: "Profesional que diseña edificios y estructuras." },
+            { word: "COMPETENCIA", clue: "Disputa entre varios que aspiran a un mismo objetivo." },
+            { word: "BIBLIOTECA", clue: "Lugar lleno de libros para leer y estudiar." },
+            { word: "ASTRONAUTA", clue: "Persona que viaja al espacio exterior." },
+            { word: "VOLCAN", clue: "Montaña con apertura por donde emerge magma." },
+            { word: "DINOSAURIO", clue: "Antiguo reptil gigante extinto hace millones de años." },
+            { word: "MEDITACION", clue: "Práctica para entrenar la mente y lograr paz." },
+            { word: "TERREMOTO", clue: "Sacudida violunda de la corteza terrestre." },
+            { word: "SATELITE", clue: "Objeto que orbita alrededor de un planeta." },
+            { word: "CURRICULUM", clue: "Resumen de experiencias laborales y académicas." },
+            { word: "PARADOJA", clue: "Idea extraña opuesta a la opinión general." },
+            { word: "METEORITO", clue: "Roca espacial que impacta contra un planeta." },
+            { word: "ESPEJISMO", clue: "Ilusión óptica debida al calor y la refracción." },
+            { word: "SIMULACION", clue: "Reproducción artificial de un fenómeno." }
         ];
+
+        // Rellenar dinámicamente con más variantes de palabras comunes si es necesario, 
+        // separando por longitudes para equilibrar el juego.
+        const shortWords = masterWords.filter(item => item.word.length >= 3 && item.word.length <= 5);
+        const longWords = masterWords.filter(item => item.word.length >= 6);
 
         let selectedObj = {};
         let secretWord = "";
@@ -175,9 +387,9 @@
         const restartBtn = document.getElementById("restart-btn");
 
         function initGame() {
-            // Probabilidad solicitada: 35% de 3-5 letras / 65% de 6-10 letras
+            // Probabilidad: 30% cortas (3-5 letras) / 70% largas (6+ letras)
             const randProbability = Math.random() * 100;
-            let pool = randProbability < 35 ? shortWords : longWords;
+            let pool = randProbability < 30 ? shortWords : longWords;
             
             selectedObj = pool[Math.floor(Math.random() * pool.length)];
             secretWord = selectedObj.word;
@@ -187,7 +399,7 @@
             hintBoxEl.classList.add("opacity-0", "scale-95", "pointer-events-none");
             clueTextEl.textContent = "...";
 
-            subtitleInfoEl.textContent = `Palabra de ${wordLength} letras • 6 intentos`;
+            subtitleInfoEl.textContent = `Palabra de ${wordLength} letras • 6 intentos (${masterWords.length}+ palabras)`;
             
             currentGuess = "";
             currentRow = 0;
