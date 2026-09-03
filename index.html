@@ -47,6 +47,11 @@
         .tile-correct { background-color: #059669; border-color: #059669; color: white; }
         .tile-present { background-color: #d97706; border-color: #d97706; color: white; }
         .tile-absent { background-color: #334155; border-color: #334155; color: white; }
+        
+        /* Custom Scrollbar para modales */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(20, 184, 166, 0.5); border-radius: 10px; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950 min-h-screen text-white flex flex-col justify-between items-center p-3 select-none overflow-x-hidden">
@@ -88,6 +93,9 @@
 
             <!-- Acciones de Cuenta / Estadísticas -->
             <div class="flex items-center gap-1.5">
+                <button id="words-btn" title="Diccionario de Palabras" class="bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 active:scale-95 transition-all p-2 rounded-xl text-sm md:text-xs flex items-center gap-1 font-bold">
+                    📖<span class="hidden sm:inline">Diccionario</span>
+                </button>
                 <button id="suggest-btn" title="Recomendar Palabra" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 active:scale-95 transition-all p-2 rounded-xl text-xs flex items-center gap-1 font-bold">
                     💡<span class="hidden sm:inline">Sugerir</span>
                 </button>
@@ -111,9 +119,12 @@
             <h1 class="text-2xl md:text-3xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-yellow-300 drop-shadow-sm">
                 PALABRA SECRETA
             </h1>
-            <div class="flex items-center justify-center gap-2 mt-1">
+            <div class="flex items-center justify-center gap-2 mt-1 flex-wrap">
                 <span class="bg-indigo-900/60 border border-indigo-400/30 text-indigo-200 text-[11px] font-medium px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
                     📚 <span id="total-words-count" class="font-extrabold text-yellow-300">--</span> palabras disponibles
+                </span>
+                <span class="bg-purple-900/60 border border-purple-400/30 text-purple-200 text-[11px] font-medium px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                    🔠 <span id="word-length-count" class="font-extrabold text-yellow-300">--</span> letras
                 </span>
             </div>
             <p id="subtitle-info" class="text-xs text-indigo-200 mt-1">Adivina la palabra oculta</p>
@@ -345,6 +356,30 @@
         </div>
     </div>
 
+    <!-- Modal Listado de Palabras -->
+    <div id="words-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-slate-900 border border-teal-500/30 rounded-2xl w-full max-w-md max-h-[85vh] flex flex-col p-5 text-left shadow-2xl relative transform scale-90 transition-all duration-300" id="words-modal-content">
+            <button id="close-words-btn" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1 text-lg font-bold z-10">✕</button>
+            
+            <h2 class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-1 text-center flex items-center justify-center gap-2 shrink-0">
+                📖 Diccionario del Juego
+            </h2>
+            <p class="text-[11px] text-teal-200/70 mb-3 text-center shrink-0">
+                Pulsa sobre una palabra para ver su pista.
+            </p>
+
+            <!-- Contenedor para desbloquear con PIN -->
+            <div id="dic-unlock-container" class="flex gap-2 mb-3 bg-slate-800/50 p-2 rounded-xl border border-white/10 shrink-0">
+                <input type="password" id="dic-pin" placeholder="PIN secreto..." class="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-teal-400 text-center tracking-widest">
+                <button id="dic-unlock-btn" class="bg-teal-600 hover:bg-teal-500 active:scale-95 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-all shadow-md">Desbloquear</button>
+            </div>
+
+            <div id="words-list-container" class="overflow-y-auto pr-2 space-y-4 flex-1 custom-scrollbar">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
     <!-- Pie de página -->
     <footer class="w-full max-w-md flex items-center justify-between text-[11px] text-indigo-300/80 pt-2 pb-1 px-2 border-t border-white/10 mt-auto">
         <span class="font-bold tracking-wide text-indigo-200/90">
@@ -373,12 +408,6 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const rawData = [
-            // 1 LETRA (27)
-            "A|Letra|Primera letra del alfabeto","B|Letra|Segunda letra del alfabeto","C|Letra|Tercera letra del alfabeto","D|Letra|Cuarta letra del alfabeto","E|Letra|Quinta letra del alfabeto","F|Letra|Sexta letra del alfabeto","G|Letra|Séptima letra del alfabeto","H|Letra|Octava letra del alfabeto","I|Letra|Novena letra del alfabeto","J|Letra|Décima letra del alfabeto","K|Letra|Undécima letra del alfabeto","L|Letra|Duodécima letra del alfabeto","M|Letra|Decimotercera letra del alfabeto","N|Letra|Decimocuarta letra del alfabeto","Ñ|Letra|Decimoquinta letra del alfabeto","O|Letra|Decimosexta letra del alfabeto","P|Letra|Decimoséptima letra del alfabeto","Q|Letra|Decimoctava letra del alfabeto","R|Letra|Decimonovena letra del alfabeto","S|Letra|Vigésima letra del alfabeto","T|Letra|Vigesimoprimera letra del alfabeto","U|Letra|Vigesimosegunda letra del alfabeto","V|Letra|Vigesimotercera letra del alfabeto","W|Letra|Vigesimocuarta letra del alfabeto","X|Letra|Vigesimoquinta letra del alfabeto","Y|Letra|Vigesimosexta letra del alfabeto","Z|Letra|Vigesimoséptima letra del alfabeto",
-            
-            // 2 LETRAS (50)
-            "EL|Artículo|Artículo definido masculino","LA|Artículo|Artículo definido femenino","EN|Preposición|Indica lugar o tiempo","UN|Artículo|Artículo indefinido masculino","SU|Pronombre|Pronombre posesivo","MI|Pronombre|Pronombre posesivo personal","TU|Pronombre|Pronombre posesivo","TE|Pronombre|Pronombre personal","SE|Pronombre|Pronombre reflexivo","DE|Preposición|Indica posesión o material","ME|Pronombre|Pronombre personal reflexivo","LO|Artículo|Artículo neutro","AL|Contracción|A + el","SI|Conjunción|Condicional o afirmación","NO|Adverbio|Negación","YA|Adverbio|Indica tiempo inmediato","YO|Pronombre|Primera persona singular","NI|Conjunción|Suma de negaciones","AS|Carta|Naipe de la baraja","AY|Interjección|Expresa dolor","AH|Interjección|Expresa asombro","OH|Interjección|Expresa admiración","HE|Verbo|Del verbo haber","HA|Verbo|Del verbo haber","VA|Verbo|Del verbo ir","VE|Verbo|Del verbo ver o ir","VI|Verbo|Del verbo ver","DI|Verbo|Del verbo decir","DA|Verbo|Del verbo dar","DO|Nota|Nota musical","FA|Nota|Nota musical","RE|Nota|Nota musical","IR|Verbo|Desplazarse a un lugar","ES|Verbo|Del verbo ser","BE|Letra|Nombre de la letra B","CE|Letra|Nombre de la letra C","GE|Letra|Nombre de la letra G","PE|Letra|Nombre de la letra P","UF|Interjección|Expresa cansancio","EX|Prefijo|Que ya no es","OX|Interjección|Para espantar aves","CA|Interjección|Antigua negación","LE|Pronombre|Pronombre de tercera persona","PI|Número|Constante matemática","TI|Pronombre|Pronombre personal","FE|Creencia|Confianza en algo","JO|Interjección|Para detener animales","JA|Risa|Expresa risa","JE|Risa|Risa irónica","JI|Risa|Risa contenida",
-
             // 3 LETRAS (50)
             "SOL|Astro|Astro diurno","PAN|Alimento|Hecho de harina","LUZ|Claridad|Vence a las sombras","MAR|Agua|Masa de agua salada","REY|Monarca|Soberano de un reino","VOZ|Sonido|Producido por cuerdas vocales","ORO|Metal|Metal precioso amarillo","RIO|Cauce|Corriente natural de agua","PAZ|Tranquilidad|Estado sin conflictos","RED|Malla|Malla de hilos","OLA|Onda|Onda en el agua","SUR|Punto|Punto cardinal","AJO|Planta|Bulbo usado en cocina","DIA|Periodo|Iluminado por el sol","GAS|Estado|Estado fluido de la materia","LEY|Norma|Regla establecida","BAR|Local|Para tomar bebidas","BUS|Transporte|Vehículo urbano","UVA|Fruta|Para hacer vino","COL|Hortaliza|Hojas apretadas","PIE|Extremidad|Base para caminar","SAL|Condimento|Sustancia blanca","VIA|Camino|Carril de tránsito","OJO|Órgano|Órgano visual","REO|Acusado|Persona juzgada","DOS|Número|Después del uno","SIN|Preposición|Carencia de algo","CON|Preposición|Compañía de algo","POR|Preposición|Causa o motivo","QUE|Pronombre|Pronombre relativo","TAL|Adjetivo|Semejante o igual","VER|Verbo|Percibir por los ojos","DAR|Verbo|Entregar algo","SER|Verbo|Tener existencia","FIN|Término|Final de algo","MAL|Daño|Lo contrario al bien","MES|Tiempo|Doceava parte del año","ECO|Sonido|Reflejo de sonido","EGO|Psicología|Conciencia del yo","IRA|Emoción|Enojo profundo","TIO|Familiar|Hermano del padre","TIA|Familiar|Hermana de la madre","OSO|Animal|Mamífero peludo","RON|Bebida|Licor de caña","TOS|Reflejo|Expulsión de aire","USO|Acción|Acción de usar","UNO|Número|El primer número","VEN|Verbo|Del verbo venir","VIO|Verbo|Del verbo ver","DIO|Verbo|Del verbo dar",
 
@@ -484,7 +513,15 @@
         const closeBugBtn = document.getElementById("close-bug-btn");
         const bugForm = document.getElementById("bug-form");
 
+        const wordsBtn = document.getElementById("words-btn");
+        const wordsModal = document.getElementById("words-modal");
+        const closeWordsBtn = document.getElementById("close-words-btn");
+        const wordsListContainer = document.getElementById("words-list-container");
+
         const INSTAGRAM_URL = "https://www.instagram.com/marcenaroc64";
+
+        // Estado del diccionario
+        let dictionaryUnlocked = false; 
 
         function initGame() {
             // Pick a random word
@@ -493,6 +530,9 @@
             currentAttempt = 0;
             currentGuess = "";
             gameOver = false;
+            
+            // Update length indicator
+            document.getElementById('word-length-count').textContent = targetWord.length;
             
             // Reset UI
             boardEl.innerHTML = "";
@@ -790,6 +830,106 @@
         const closeBug = () => toggleModal(bugModal, document.getElementById("bug-modal-content"), false);
         bugBtn.addEventListener("click", openBug);
         closeBugBtn.addEventListener("click", closeBug);
+
+        // Words / Diccionario Modal Logic
+        function renderWordsList() {
+            const grouped = {};
+            DICTIONARY.forEach(item => {
+                const len = item.word.length;
+                if (!grouped[len]) grouped[len] = [];
+                grouped[len].push(item);
+            });
+
+            wordsListContainer.innerHTML = '';
+            
+            Object.keys(grouped).sort((a,b) => a - b).forEach(len => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = "mb-4";
+                
+                const title = document.createElement('h3');
+                title.className = "text-sm font-bold text-teal-400 border-b border-teal-500/20 pb-1 mb-2 sticky top-0 bg-slate-900/95 backdrop-blur-sm z-10 flex justify-between items-center";
+                title.innerHTML = `<span>${len} Letras</span> <span class="text-[10px] text-teal-300 bg-teal-900/50 px-2 py-0.5 rounded-full">${grouped[len].length} palabras</span>`;
+                groupDiv.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = "grid grid-cols-2 gap-2";
+                
+                grouped[len].forEach(item => {
+                    const wordBadge = document.createElement('div');
+                    wordBadge.className = "bg-white/5 border border-white/10 rounded p-1.5 text-center text-xs font-bold text-slate-300 hover:bg-teal-500/20 hover:text-teal-200 hover:border-teal-500/50 transition-all cursor-pointer flex items-center justify-center min-h-[40px] select-none";
+                    
+                    if (dictionaryUnlocked) {
+                        wordBadge.title = `Pista: ${item.shortDesc} | Final: ${item.longDesc}`;
+                        wordBadge.textContent = item.word;
+                    } else {
+                        wordBadge.title = "Bloqueado";
+                        wordBadge.textContent = '*'.repeat(item.word.length);
+                        wordBadge.classList.add("blur-[2px]", "opacity-50"); // Efecto pixeliado/borroso
+                    }
+                    
+                    let showingDesc = false;
+                    wordBadge.addEventListener('click', () => {
+                        if (!dictionaryUnlocked) {
+                            showMessage("¡Ingresa el PIN para desbloquear el diccionario!", 2500);
+                            const unlockContainer = document.getElementById('dic-unlock-container');
+                            unlockContainer.classList.add("shake-animation");
+                            setTimeout(() => unlockContainer.classList.remove("shake-animation"), 400);
+                            return;
+                        }
+
+                        if (!showingDesc) {
+                            wordBadge.innerHTML = `<span class="text-[10px] font-normal leading-tight">${item.shortDesc}</span>`;
+                            wordBadge.classList.add("text-teal-300", "bg-teal-900/40", "border-teal-500/50");
+                            wordBadge.classList.remove("text-slate-300", "bg-white/5", "border-white/10");
+                            showingDesc = true;
+                            setTimeout(() => {
+                                wordBadge.textContent = item.word;
+                                wordBadge.classList.remove("text-teal-300", "bg-teal-900/40", "border-teal-500/50");
+                                wordBadge.classList.add("text-slate-300", "bg-white/5", "border-white/10");
+                                showingDesc = false;
+                            }, 3000);
+                        }
+                    });
+                    
+                    grid.appendChild(wordBadge);
+                });
+                
+                groupDiv.appendChild(grid);
+                wordsListContainer.appendChild(groupDiv);
+            });
+        }
+
+        const openWords = () => { 
+            // Controlar vista del PIN dependiendo de si ya está desbloqueado
+            if (!dictionaryUnlocked) {
+                document.getElementById('dic-unlock-container').classList.remove('hidden');
+                document.getElementById('dic-pin').value = '';
+            } else {
+                document.getElementById('dic-unlock-container').classList.add('hidden');
+            }
+            renderWordsList(); 
+            toggleModal(wordsModal, document.getElementById("words-modal-content"), true); 
+        };
+        const closeWords = () => toggleModal(wordsModal, document.getElementById("words-modal-content"), false);
+        
+        wordsBtn.addEventListener("click", openWords);
+        closeWordsBtn.addEventListener("click", closeWords);
+
+        // Lógica del botón desbloquear
+        document.getElementById('dic-unlock-btn').addEventListener('click', () => {
+            const pin = document.getElementById('dic-pin').value;
+            if (pin === '140703') {
+                dictionaryUnlocked = true;
+                document.getElementById('dic-unlock-container').classList.add('hidden');
+                showMessage("Diccionario Desbloqueado 🔓", 2000);
+                renderWordsList();
+            } else {
+                showMessage("PIN incorrecto ❌", 2000);
+                const unlockContainer = document.getElementById('dic-unlock-container');
+                unlockContainer.classList.add('shake-animation');
+                setTimeout(() => unlockContainer.classList.remove('shake-animation'), 400);
+            }
+        });
 
         function copyToClipboard(text) {
             const textArea = document.createElement("textarea");
