@@ -1024,8 +1024,14 @@
         let currentUser = null;
 
         try {
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-            if (firebaseConfig) {
+            const firebaseConfig = {
+                apiKey: "AIzaSyC7hjuWiRx3uBdfKAS3mj9na6zqO6xtQUY",
+                authDomain: "palabra-secre.firebaseapp.com",
+                projectId: "palabra-secre",
+                storageBucket: "palabra-secre.firebasestorage.app",
+                messagingSenderId: "1057501011597",
+                appId: "1:1057501011597:web:ab2dd815a8ad9a293cccc4"
+                };
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
@@ -1072,7 +1078,7 @@
                     }
                 });
             }
-        } catch (e) {
+         catch (e) {
             console.error("Firebase no configurado o falló al iniciar", e);
         }
 
