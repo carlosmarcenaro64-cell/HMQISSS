@@ -28,7 +28,7 @@
             40%, 80% { transform: translateX(6px); }
         }
         .flip-tile {
-            animation: flip 0.5s ease-in-out forwards;
+            animation: flip 0.6s ease-in-out forwards;
         }
         @keyframes flip {
             0% { transform: rotateX(0deg); }
@@ -42,9 +42,36 @@
             0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.3); }
             50% { box-shadow: 0 0 25px rgba(234, 179, 8, 0.6); }
         }
+        
+        /* Utility classes for tile colors to simplify JS */
+        .tile-correct { background-color: #059669; border-color: #059669; color: white; }
+        .tile-present { background-color: #d97706; border-color: #d97706; color: white; }
+        .tile-absent { background-color: #334155; border-color: #334155; color: white; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950 min-h-screen text-white flex flex-col justify-between items-center p-3 select-none overflow-x-hidden">
+
+    <!-- Pantalla de Carga (Splash Screen) -->
+    <div id="splash-screen" class="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center transition-all duration-700 ease-in-out">
+        <div class="flex flex-col items-center justify-center pop-animation">
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-yellow-300 drop-shadow-2xl mb-6 text-center animate-pulse">
+                PALABRA<br>SECRETA
+            </h1>
+            
+            <div class="flex items-center gap-2 mt-4 opacity-80 animate-bounce">
+                <span class="font-bold tracking-widest text-indigo-200 text-sm">
+                    By: <span class="text-pink-400">Marcenaroc64</span>
+                </span>
+            </div>
+            
+            <!-- Pequeño indicador de carga -->
+            <div class="mt-8 flex gap-1">
+                <div class="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style="animation-delay: 0s;"></div>
+                <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+                <div class="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" style="animation-delay: 0.4s;"></div>
+            </div>
+        </div>
+    </div>
 
     <header class="w-full max-w-md flex flex-col gap-2 py-2">
         <div class="flex items-center justify-between bg-white/10 backdrop-blur-md px-3 py-2 rounded-2xl border border-white/10">
@@ -54,8 +81,8 @@
                     👤
                 </div>
                 <div class="flex flex-col">
-                    <span id="user-name" class="text-xs font-bold truncate max-w-[120px] text-indigo-100">Cargando...</span>
-                    <span id="user-status" class="text-[10px] text-indigo-300">Modo Invitado</span>
+                    <span id="user-name" class="text-xs font-bold truncate max-w-[120px] text-indigo-100">Invitado</span>
+                    <span id="user-status" class="text-[10px] text-indigo-300">Progreso Local</span>
                 </div>
             </div>
 
@@ -74,7 +101,7 @@
                     📊
                 </button>
                 <button id="auth-btn" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 active:scale-95 text-white font-bold text-xs px-2.5 py-2 rounded-xl shadow-md transition-all flex items-center gap-1">
-                    <span>Iniciando...</span>
+                    <span>Acceder</span>
                 </button>
             </div>
         </div>
@@ -86,7 +113,7 @@
             </h1>
             <div class="flex items-center justify-center gap-2 mt-1">
                 <span class="bg-indigo-900/60 border border-indigo-400/30 text-indigo-200 text-[11px] font-medium px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-                    📚 <span id="total-words-count" class="font-extrabold text-yellow-300">250</span> palabras disponibles
+                    📚 <span id="total-words-count" class="font-extrabold text-yellow-300">--</span> palabras disponibles
                 </span>
             </div>
             <p id="subtitle-info" class="text-xs text-indigo-200 mt-1">Adivina la palabra oculta</p>
@@ -96,21 +123,21 @@
     <main class="w-full max-w-md flex flex-col items-center gap-3 my-auto">
         
         <!-- Pista Actual -->
-        <div id="hint-box" class="bg-white/15 backdrop-blur-md border border-yellow-400/30 rounded-xl px-4 py-2 text-center text-xs md:text-sm text-yellow-200 font-medium shadow-lg w-full transition-all duration-500 opacity-0 scale-95 pointer-events-none pulse-glow">
+        <div id="hint-box" class="bg-white/15 backdrop-blur-md border border-yellow-400/30 rounded-xl px-4 py-2 text-center text-xs md:text-sm text-yellow-200 font-medium shadow-lg w-full transition-all duration-500 opacity-0 scale-95 pointer-events-none hidden">
             🔮 <span class="font-bold">Pista:</span> <span id="clue-text" class="italic">...</span>
         </div>
 
         <!-- Cuadrícula del Tablero -->
-        <div id="board" class="w-full max-w-[320px] mx-auto flex flex-col gap-1.5 justify-center items-center">
-            <!-- Celdas dinámicas -->
+        <div id="board" class="w-full mx-auto flex flex-col gap-1.5 justify-center items-center px-2">
+            <!-- Celdas dinámicas se insertan aquí -->
         </div>
 
         <!-- Mensajes de Estado -->
-        <div id="message-container" class="h-7 flex items-center justify-center">
-            <span id="game-message" class="text-xs md:text-sm font-semibold px-4 py-1 rounded-full bg-black/60 backdrop-blur border border-white/10 text-pink-300 opacity-0 transition-all duration-300 shadow-md"></span>
+        <div id="message-container" class="h-8 flex items-center justify-center mt-2 z-10">
+            <span id="game-message" class="text-xs md:text-sm font-semibold px-4 py-2 rounded-xl bg-slate-900/90 backdrop-blur border border-pink-500/30 text-pink-300 opacity-0 transition-opacity duration-300 shadow-lg pointer-events-none"></span>
         </div>
 
-        <div id="keyboard" class="w-full flex flex-col gap-1.5 max-w-md px-1">
+        <div id="keyboard" class="w-full flex flex-col gap-1.5 max-w-md px-1 mt-2">
             <!-- Fila 1 -->
             <div class="flex justify-center gap-1 w-full">
                 <button data-key="Q" class="key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-90 transition-all font-bold py-3 rounded-lg text-xs md:text-sm shadow-md">Q</button>
@@ -152,21 +179,21 @@
         </div>
 
         <!-- Botón Reiniciar -->
-        <button id="restart-btn" class="hidden bg-gradient-to-r from-pink-500 to-yellow-400 hover:opacity-95 active:scale-95 text-slate-950 font-bold px-8 py-3 rounded-xl shadow-xl transition-all tracking-wide text-sm animate-bounce">
+        <button id="restart-btn" class="hidden mt-4 bg-gradient-to-r from-pink-500 to-yellow-400 hover:opacity-95 active:scale-95 text-slate-950 font-bold px-8 py-3 rounded-xl shadow-xl transition-all tracking-wide text-sm animate-bounce">
             ✨ Jugar Nuevamente
         </button>
 
     </main>
 
     <!-- Modal Estadísticas -->
-    <div id="stats-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div id="stats-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
         <div class="bg-slate-900 border border-white/20 rounded-2xl w-full max-w-sm p-6 text-center shadow-2xl relative transform scale-90 transition-all duration-300" id="stats-modal-content">
             <button id="close-stats-btn" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1 text-lg font-bold">✕</button>
             
             <h2 class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-400 mb-1">
                 Estadísticas de Juego
             </h2>
-            <p id="stats-user-label" class="text-xs text-indigo-300 mb-5">Progreso en la nube</p>
+            <p id="stats-user-label" class="text-xs text-indigo-300 mb-5">Progreso Local</p>
 
             <div class="grid grid-cols-2 gap-3 mb-6">
                 <div class="bg-white/5 border border-white/10 p-3 rounded-xl flex flex-col items-center">
@@ -199,7 +226,7 @@
     </div>
 
     <!-- Modal Cómo Jugar -->
-    <div id="help-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div id="help-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
         <div class="bg-slate-900 border border-white/20 rounded-2xl w-full max-w-sm p-5 text-left shadow-2xl relative transform scale-90 transition-all duration-300" id="help-modal-content">
             <button id="close-help-btn" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1 text-lg font-bold">✕</button>
             
@@ -214,7 +241,7 @@
                 <div class="flex items-center gap-3 bg-white/5 p-2.5 rounded-xl border border-white/10">
                     <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white shrink-0">A</div>
                     <div>
-                        <span class="font-bold text-emerald-400 block">Verde: Posición Correcta</span>
+                        <span class="font-bold text-emerald-400 block">Verde: Correcto</span>
                         <span class="text-slate-300 text-[11px]">La letra está en la palabra y en el lugar correcto.</span>
                     </div>
                 </div>
@@ -222,7 +249,7 @@
                 <div class="flex items-center gap-3 bg-white/5 p-2.5 rounded-xl border border-white/10">
                     <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center font-bold text-white shrink-0">B</div>
                     <div>
-                        <span class="font-bold text-amber-300 block">Amarillo: Posición Incorrecta</span>
+                        <span class="font-bold text-amber-300 block">Amarillo: Otra Posición</span>
                         <span class="text-slate-300 text-[11px]">La letra está en la palabra, pero en otra posición.</span>
                     </div>
                 </div>
@@ -236,7 +263,7 @@
                 </div>
 
                 <div class="bg-indigo-950/80 p-2.5 rounded-xl border border-indigo-500/30 text-[11px] text-indigo-200">
-                    💡 <span class="font-semibold text-yellow-300">Pistas progresivas:</span> En el penúltimo intento obtendrás una pista corta y en el último intento la pista completa.
+                    💡 <span class="font-semibold text-yellow-300">Pistas progresivas:</span> Obtendrás una pista en el 5º intento y la descripción completa al finalizar.
                 </div>
             </div>
 
@@ -247,7 +274,7 @@
     </div>
 
     <!-- Modal Recomendar Palabra -->
-    <div id="suggest-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div id="suggest-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
         <div class="bg-slate-900 border border-amber-500/30 rounded-2xl w-full max-w-sm p-5 text-left shadow-2xl relative transform scale-90 transition-all duration-300" id="suggest-modal-content">
             <button id="close-suggest-btn" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1 text-lg font-bold">✕</button>
             
@@ -261,35 +288,35 @@
             <form id="suggest-form" class="space-y-3">
                 <div>
                     <label class="block text-[11px] font-bold text-amber-300 uppercase mb-1">Palabra *</label>
-                    <input type="text" id="suggest-word" placeholder="Ej: ASTRONAUTA" required uppercase
+                    <input type="text" id="suggest-word" placeholder="Ej: ASTRONAUTA" required 
                            class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 uppercase font-bold tracking-wider">
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-amber-300 uppercase mb-1">Descripción Corta (Pista penúltimo intento) *</label>
+                    <label class="block text-[11px] font-bold text-amber-300 uppercase mb-1">Descripción Corta (Pista) *</label>
                     <input type="text" id="suggest-short" placeholder="Ej: Viajero espacial" required
                            class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400">
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-amber-300 uppercase mb-1">Descripción Larga (Pista final) *</label>
-                    <textarea id="suggest-long" rows="2" placeholder="Ej: Persona entrenada para viajar y explorar el espacio exterior." required
+                    <label class="block text-[11px] font-bold text-amber-300 uppercase mb-1">Descripción Larga (Final) *</label>
+                    <textarea id="suggest-long" rows="2" placeholder="Ej: Persona entrenada para viajar y explorar..." required
                               class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 resize-none"></textarea>
                 </div>
 
-                <div class="bg-amber-950/40 p-2.5 rounded-xl border border-amber-500/30 text-[11px] text-amber-200">
-                    📲 Al hacer clic, se copiará el mensaje formateado y te redirigirá a Instagram para que lo envíes.
+                <div class="bg-amber-950/40 p-2.5 rounded-xl border border-amber-500/30 text-[11px] text-amber-200 leading-tight">
+                    📲 Al enviar, el texto se copiará y se abrirá Instagram para que lo mandes por mensaje directo.
                 </div>
 
                 <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black py-2.5 rounded-xl text-xs tracking-wide shadow-lg transition-all active:scale-95">
-                    🚀 Enviar Sugerencia por Instagram
+                    🚀 Enviar vía Instagram
                 </button>
             </form>
         </div>
     </div>
 
     <!-- Modal Reportar Bug -->
-    <div id="bug-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div id="bug-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
         <div class="bg-slate-900 border border-rose-500/30 rounded-2xl w-full max-w-sm p-5 text-left shadow-2xl relative transform scale-90 transition-all duration-300" id="bug-modal-content">
             <button id="close-bug-btn" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1 text-lg font-bold">✕</button>
             
@@ -303,29 +330,16 @@
             <form id="bug-form" class="space-y-3">
                 <div>
                     <label class="block text-[11px] font-bold text-rose-300 uppercase mb-1">Descripción del fallo *</label>
-                    <textarea id="bug-desc" rows="3" placeholder="Describe lo que ocurrió y cómo replicarlo..." required
+                    <textarea id="bug-desc" rows="4" placeholder="Describe lo que ocurrió y cómo replicarlo..." required
                               class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-rose-400 resize-none"></textarea>
                 </div>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-rose-300 uppercase mb-1">Foto o Captura (Opcional)</label>
-                    <input type="file" id="bug-photo" accept="image/*" class="hidden">
-                    <label for="bug-photo" class="w-full bg-white/10 hover:bg-white/15 border border-dashed border-white/30 rounded-xl px-3 py-2.5 text-xs text-indigo-200 cursor-pointer flex items-center justify-center gap-2 transition-all">
-                        📸 <span id="photo-label">Adjuntar captura de pantalla</span>
-                    </label>
-                    <div id="photo-preview-box" class="hidden mt-2 flex items-center gap-2 bg-white/5 p-2 rounded-xl border border-white/10">
-                        <img id="photo-preview-img" class="w-10 h-10 object-cover rounded-lg" alt="Vista previa">
-                        <span id="photo-name" class="text-[11px] text-slate-300 truncate flex-1"></span>
-                        <button type="button" id="remove-photo-btn" class="text-rose-400 text-xs font-bold px-1 hover:text-rose-300">✕</button>
-                    </div>
-                </div>
-
-                <div class="bg-rose-950/40 p-2.5 rounded-xl border border-rose-500/30 text-[11px] text-rose-200">
-                    📲 El texto se copiará al portapapeles y se abrirá Instagram para enviarlo. Si elegiste foto, ¡recuerda adjuntarla en el chat!
+                <div class="bg-rose-950/40 p-2.5 rounded-xl border border-rose-500/30 text-[11px] text-rose-200 leading-tight">
+                    📲 El texto se copiará al portapapeles y se abrirá Instagram para enviarlo por mensaje directo.
                 </div>
 
                 <button type="submit" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-black py-2.5 rounded-xl text-xs tracking-wide shadow-lg transition-all active:scale-95">
-                    📩 Reportar Bug por Instagram
+                    📩 Reportar vía Instagram
                 </button>
             </form>
         </div>
@@ -333,13 +347,11 @@
 
     <!-- Pie de página -->
     <footer class="w-full max-w-md flex items-center justify-between text-[11px] text-indigo-300/80 pt-2 pb-1 px-2 border-t border-white/10 mt-auto">
-        <!-- Crédito del Creador -->
         <span class="font-bold tracking-wide text-indigo-200/90">
             By: <span class="text-pink-400">Marcenaroc64</span>
         </span>
 
-        <!-- Botón TikTok -->
-        <a href="https://www.tiktok.com/@marcenaroc64?is_from_webapp=1&sender_device=pc" 
+        <a href="https://www.tiktok.com/@marcenaroc64" 
            target="_blank" 
            rel="noopener noreferrer" 
            class="flex items-center gap-1.5 bg-black/60 hover:bg-black/90 active:scale-95 border border-white/20 text-white px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all shadow-md hover:border-pink-500/50">
@@ -351,56 +363,107 @@
     </footer>
 
     <script type="module">
+        // Firebase imports preserved as requested by the original structure
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
-            getAuth, 
-            signInAnonymously, 
-            signInWithCustomToken, 
-            GoogleAuthProvider, 
-            signInWithPopup, 
-            signOut, 
-            onAuthStateChanged 
+            getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
-            getFirestore, 
-            doc, 
-            getDoc, 
-            setDoc, 
-            onSnapshot 
+            getFirestore, doc, getDoc, setDoc 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Configuración global de Firebase
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'palabra-secreta-default';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config) 
-            : {
-                apiKey: "AIzaSyDemoPlaceholderOnly",
-                authDomain: "demo-app.firebaseapp.com",
-                projectId: "demo-app",
-                storageBucket: "demo-app.appspot.com",
-                messagingSenderId: "123456789",
-                appId: "1:123456789:web:demo"
-            };
+        const rawData = [
+            // 1 LETRA (27)
+            "A|Letra|Primera letra del alfabeto","B|Letra|Segunda letra del alfabeto","C|Letra|Tercera letra del alfabeto","D|Letra|Cuarta letra del alfabeto","E|Letra|Quinta letra del alfabeto","F|Letra|Sexta letra del alfabeto","G|Letra|Séptima letra del alfabeto","H|Letra|Octava letra del alfabeto","I|Letra|Novena letra del alfabeto","J|Letra|Décima letra del alfabeto","K|Letra|Undécima letra del alfabeto","L|Letra|Duodécima letra del alfabeto","M|Letra|Decimotercera letra del alfabeto","N|Letra|Decimocuarta letra del alfabeto","Ñ|Letra|Decimoquinta letra del alfabeto","O|Letra|Decimosexta letra del alfabeto","P|Letra|Decimoséptima letra del alfabeto","Q|Letra|Decimoctava letra del alfabeto","R|Letra|Decimonovena letra del alfabeto","S|Letra|Vigésima letra del alfabeto","T|Letra|Vigesimoprimera letra del alfabeto","U|Letra|Vigesimosegunda letra del alfabeto","V|Letra|Vigesimotercera letra del alfabeto","W|Letra|Vigesimocuarta letra del alfabeto","X|Letra|Vigesimoquinta letra del alfabeto","Y|Letra|Vigesimosexta letra del alfabeto","Z|Letra|Vigesimoséptima letra del alfabeto",
+            
+            // 2 LETRAS (50)
+            "EL|Artículo|Artículo definido masculino","LA|Artículo|Artículo definido femenino","EN|Preposición|Indica lugar o tiempo","UN|Artículo|Artículo indefinido masculino","SU|Pronombre|Pronombre posesivo","MI|Pronombre|Pronombre posesivo personal","TU|Pronombre|Pronombre posesivo","TE|Pronombre|Pronombre personal","SE|Pronombre|Pronombre reflexivo","DE|Preposición|Indica posesión o material","ME|Pronombre|Pronombre personal reflexivo","LO|Artículo|Artículo neutro","AL|Contracción|A + el","SI|Conjunción|Condicional o afirmación","NO|Adverbio|Negación","YA|Adverbio|Indica tiempo inmediato","YO|Pronombre|Primera persona singular","NI|Conjunción|Suma de negaciones","AS|Carta|Naipe de la baraja","AY|Interjección|Expresa dolor","AH|Interjección|Expresa asombro","OH|Interjección|Expresa admiración","HE|Verbo|Del verbo haber","HA|Verbo|Del verbo haber","VA|Verbo|Del verbo ir","VE|Verbo|Del verbo ver o ir","VI|Verbo|Del verbo ver","DI|Verbo|Del verbo decir","DA|Verbo|Del verbo dar","DO|Nota|Nota musical","FA|Nota|Nota musical","RE|Nota|Nota musical","IR|Verbo|Desplazarse a un lugar","ES|Verbo|Del verbo ser","BE|Letra|Nombre de la letra B","CE|Letra|Nombre de la letra C","GE|Letra|Nombre de la letra G","PE|Letra|Nombre de la letra P","UF|Interjección|Expresa cansancio","EX|Prefijo|Que ya no es","OX|Interjección|Para espantar aves","CA|Interjección|Antigua negación","LE|Pronombre|Pronombre de tercera persona","PI|Número|Constante matemática","TI|Pronombre|Pronombre personal","FE|Creencia|Confianza en algo","JO|Interjección|Para detener animales","JA|Risa|Expresa risa","JE|Risa|Risa irónica","JI|Risa|Risa contenida",
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+            // 3 LETRAS (50)
+            "SOL|Astro|Astro diurno","PAN|Alimento|Hecho de harina","LUZ|Claridad|Vence a las sombras","MAR|Agua|Masa de agua salada","REY|Monarca|Soberano de un reino","VOZ|Sonido|Producido por cuerdas vocales","ORO|Metal|Metal precioso amarillo","RIO|Cauce|Corriente natural de agua","PAZ|Tranquilidad|Estado sin conflictos","RED|Malla|Malla de hilos","OLA|Onda|Onda en el agua","SUR|Punto|Punto cardinal","AJO|Planta|Bulbo usado en cocina","DIA|Periodo|Iluminado por el sol","GAS|Estado|Estado fluido de la materia","LEY|Norma|Regla establecida","BAR|Local|Para tomar bebidas","BUS|Transporte|Vehículo urbano","UVA|Fruta|Para hacer vino","COL|Hortaliza|Hojas apretadas","PIE|Extremidad|Base para caminar","SAL|Condimento|Sustancia blanca","VIA|Camino|Carril de tránsito","OJO|Órgano|Órgano visual","REO|Acusado|Persona juzgada","DOS|Número|Después del uno","SIN|Preposición|Carencia de algo","CON|Preposición|Compañía de algo","POR|Preposición|Causa o motivo","QUE|Pronombre|Pronombre relativo","TAL|Adjetivo|Semejante o igual","VER|Verbo|Percibir por los ojos","DAR|Verbo|Entregar algo","SER|Verbo|Tener existencia","FIN|Término|Final de algo","MAL|Daño|Lo contrario al bien","MES|Tiempo|Doceava parte del año","ECO|Sonido|Reflejo de sonido","EGO|Psicología|Conciencia del yo","IRA|Emoción|Enojo profundo","TIO|Familiar|Hermano del padre","TIA|Familiar|Hermana de la madre","OSO|Animal|Mamífero peludo","RON|Bebida|Licor de caña","TOS|Reflejo|Expulsión de aire","USO|Acción|Acción de usar","UNO|Número|El primer número","VEN|Verbo|Del verbo venir","VIO|Verbo|Del verbo ver","DIO|Verbo|Del verbo dar",
 
-        // Estado del usuario y estadísticas
-        let currentUser = null;
-        let unsubscribeStats = null;
-        let userStats = {
-            won: 0,
-            lost: 0,
-            played: 0,
-            streak: 0
-        };
+            // 4 LETRAS (50)
+            "CASA|Vivienda|Lugar habitable","LUNA|Satélite|Satélite natural","AGUA|Líquido|Líquido vital","AZUL|Color|Color del cielo","ROJO|Color|Color del fuego","FLOR|Planta|Parte reproductiva","GATO|Felino|Mascota maulladora","ISLA|Tierra|Rodeada de agua","VIDA|Existencia|Estado de los seres vivos","NUBE|Vapor|Masa en el cielo","ARTE|Expresión|Creación estética","RUTA|Camino|Vía a seguir","AMOR|Sentimiento|Afecto profundo","ROCA|Piedra|Material sólido","AIRE|Gas|Gas que respiramos","ALMA|Espíritu|Esencia humana","NAVE|Vehículo|Embarcación","MALA|Adjetivo|Sin bondad","LAGO|Agua|Cuerpo de agua dulce","MESA|Mueble|Tabla con patas","PINO|Árbol|De hojas perennes","PASO|Movimiento|Al caminar","RAYO|Luz|Descarga eléctrica","MIEL|Dulce|Producida por abejas","LEON|Felino|Rey de la selva","TREN|Transporte|Vehículo sobre vías","HOJA|Planta|Parte de un árbol","BOLA|Objeto|Esfera de juego","CAJA|Recipiente|Para guardar cosas","BOTE|Vehículo|Pequeña embarcación","RANA|Anfibio|Animal saltarín","PATO|Ave|Ave acuática","LOBO|Canino|Animal salvaje","COPA|Vaso|Recipiente para beber","ROPA|Prenda|Para vestir","TELA|Tejido|Material textil","LORO|Ave|Ave que habla","CARA|Rostro|Parte frontal de la cabeza","BOCA|Órgano|Abertura digestiva","PELO|Cabello|Fibra capilar","MANO|Extremidad|Para agarrar","DEDO|Extremidad|Parte de la mano","NUDO|Lazo|Atadura de cuerda","FOTO|Imagen|Captura visual","MOTO|Vehículo|Dos ruedas motorizadas","AUTO|Vehículo|Coche de cuatro ruedas","TAZA|Recipiente|Para bebidas calientes","PICO|Herramienta|Para cavar","RATA|Roedor|Animal de alcantarilla","SAPO|Anfibio|Parecido a la rana",
 
-        // UI Auth Elements
-        const authBtn = document.getElementById("auth-btn");
-        const userNameEl = document.getElementById("user-name");
-        const userStatusEl = document.getElementById("user-status");
-        const userAvatarEl = document.getElementById("user-avatar");
+            // 5 LETRAS (50)
+            "PERRO|Mascota|Compañero canino","PLAYA|Costa|Arena junto al mar","LIBRO|Lectura|Hojas encuadernadas","FUEGO|Llama|Calor intenso","MUNDO|Planeta|El planeta Tierra","SABIO|Experto|Persona con mucha sabiduría","RELOJ|Tiempo|Mide el tiempo","VALLE|Geografía|Terreno entre montañas","TIGRE|Felino|Animal rayado","SUEÑO|Descanso|Imágenes al dormir","MAGIA|Ilusión|Arte ilusorio","BARCO|Vehículo|Embarcación grande","CIELO|Atmósfera|Bóveda celeste","ARBOL|Planta|Planta de tronco leñoso","NOCHE|Oscuridad|Periodo sin sol","PLUMA|Ave|Cobertura de aves","VERDE|Color|Color de la naturaleza","MONTE|Elevación|Elevación de tierra","CAMPO|Terreno|Fuera de la ciudad","FRUTA|Alimento|Fruto dulce","HOTEL|Alojamiento|Lugar para dormir","BANDA|Grupo|Grupo musical","BRUJA|Mística|Mujer con magia","CARTA|Mensaje|Mensaje escrito","LLAVE|Herramienta|Para abrir cerraduras","RATON|Roedor|Animal pequeño","GAFAS|Lentes|Para ver mejor","SILLA|Mueble|Para sentarse","BOLSO|Accesorio|Para llevar cosas","LAPIZ|Escritura|Para escribir","CABLE|Conexión|Hilo conductor","PANEL|Superficie|Placa plana","LIMON|Cítrico|Fruto ácido","MELON|Fruta|Fruta jugosa","FRESA|Fruta|Fruta roja pequeña","MANGO|Fruta|Fruta tropical","PERLA|Joya|Gema del mar","CISNE|Ave|Ave elegante","CALOR|Temperatura|Alta temperatura","VAPOR|Gas|Agua en gas","HIELO|Agua|Agua congelada","NIEVE|Clima|Agua helada que cae","LLAMA|Fuego|Fuego vivo","ARENA|Tierra|Granitos en la playa","POLVO|Tierra|Partículas finas","TAZAS|Vajilla|Para beber café","GORRO|Prenda|Para la cabeza","DISCO|Objeto|Círculo plano","LETRA|Símbolo|Signo del alfabeto","PIZZA|Comida|Masa con queso",
+
+            // 6 LETRAS (50)
+            "MUSICA|Arte|Arte sonoro","FUTURO|Tiempo|Tiempo por venir","VOLCAN|Montaña|Montaña que lanza lava","CAMINO|Ruta|Vía de paso","TESORO|Riqueza|Objeto valioso oculto","PUERTA|Acceso|Entrada a un cuarto","CIUDAD|Urbano|Población grande","TIEMPO|Dimensión|Avance cronológico","LLUVIA|Clima|Agua del cielo","VIENTO|Aire|Aire en movimiento","SANGRE|Líquido|Líquido vital rojo","PLANTA|Vegetal|Ser vivo vegetal","SABADO|Día|Día de la semana","CUERPO|Físico|Estructura física","JARDIN|Exterior|Donde crecen flores","PINTOR|Artista|Quien pinta cuadros","MADERA|Material|Del tronco del árbol","TEATRO|Escenario|Arte escénico","JIRAFA|Animal|De cuello muy largo","VERANO|Estación|Época de calor","ESPEJO|Cristal|Refleja la imagen","CUMBRE|Cima|Punto más alto","CENTRO|Medio|Punto central","BOSQUE|Naturaleza|Lleno de árboles","OCEANO|Mar|Gran masa de agua","BLANCO|Color|Color de la nieve","AMARGO|Sabor|Sabor fuerte","FUERTE|Fuerza|Con mucha energía","LIGERO|Peso|Poco peso","PESADO|Peso|Mucho peso","RAPIDO|Veloz|Alta velocidad","GRANDE|Tamaño|De gran tamaño","CABEZA|Cuerpo|Parte superior del cuerpo","PIERNA|Cuerpo|Extremidad inferior","BRAZOS|Cuerpo|Extremidades superiores","BANANA|Fruta|Fruta amarilla","TOMATE|Vegetal|Fruto rojo","PATATA|Tubérculo|Tubérculo comestible","PEPINO|Vegetal|Vegetal verde alargado","CARNES|Comida|Alimento animal","HELADO|Postre|Postre congelado","POSTRE|Comida|Dulce tras la comida","LENGUA|Órgano|Órgano del gusto","DIENTE|Boca|Pieza para masticar","PUEBLO|Lugar|Localidad pequeña","MEDICO|Doctor|Profesional de salud","COHETE|Espacio|Nave espacial","METEOR|Astro|Roca espacial","SIERRA|Herramienta|Para cortar madera","FLORES|Plantas|Partes coloridas de plantas",
+
+            // 7 LETRAS (50)
+            "PLANETA|Astro|Cuerpo celeste","CIENCIA|Estudio|Conocimiento riguroso","GALAXIA|Espacio|Sistema estelar","MONTAÑA|Geografía|Gran elevación","DESTINO|Rumbo|Punto de llegada","ENERGIA|Fuerza|Capacidad de trabajo","TRIUNFO|Éxito|Gran victoria","LEYENDA|Relato|Historia mítica","CORAZON|Órgano|Bombea la sangre","SECRETO|Oculto|Información reservada","MEMORIA|Mente|Capacidad de recordar","VENTANA|Abertura|Abertura en la pared","PALABRA|Lenguaje|Unidad del idioma","CANCION|Música|Composición cantada","GIRASOL|Flor|Flor que sigue al sol","RIQUEZA|Dinero|Abundancia de bienes","BATALLA|Combate|Enfrentamiento bélico","BRAVURA|Valor|Gran valentía","BARRERA|Obstáculo|Impide el paso","CAMELLO|Animal|Mamífero del desierto","REFUGIO|Protección|Lugar seguro","ANTIGUO|Viejo|De gran edad","ESPECIE|Biología|Grupo de seres vivos","PINTURA|Arte|Arte con colores","MASCOTA|Animal|Compañero en casa","SILUETA|Sombra|Contorno de figura","SOMBRAS|Oscuridad|Reflejos oscuros","CORTINA|Tela|Cubre ventanas","PUERTAS|Accesos|Entradas a lugares","PAREDES|Estructura|Muros de una casa","CUADROS|Arte|Pinturas enmarcadas","ADORNOS|Decoración|Objetos decorativos","PLANTAS|Vegetales|Seres vivos verdes","ARBOLES|Naturaleza|Plantas grandes","INSECTO|Bicho|Animal pequeño","PAJAROS|Aves|Animales que vuelan","TIBURON|Pez|Depredador marino","MEDUSAS|Mar|Animales gelatinosos","COMETAS|Astros|Cuerpos celestes con cola","ESPACIO|Universo|El cosmos","COHETES|Naves|Vehículos espaciales","MOTORES|Máquinas|Generan movimiento","ABUELOS|Familia|Padres de los padres","CAMISAS|Ropa|Prendas de vestir","ZAPATOS|Calzado|Para proteger los pies","VESTIDO|Ropa|Prenda femenina","CORBATA|Accesorio|Accesorio formal","GUANTES|Ropa|Protegen las manos","CALZADO|Ropa|Zapatos en general","TARTUFO|Hongo|Hongo muy cotizado",
+
+            // 8 LETRAS (50)
+            "HISTORIA|Pasado|Relato del pasado","SILENCIO|Paz|Ausencia de sonido","ESTRELLA|Astro|Cuerpo que brilla","ACERTIJO|Juego|Enigma de ingenio","CRIATURA|Ser|Ser vivo","AVENTURA|Emoción|Experiencia incierta","CASTILLO|Fortaleza|Construcción medieval","MARIPOSA|Insecto|Insecto de colores","LIBERTAD|Derecho|Autonomía total","BRUJERIA|Magia|Práctica mística","TORMENTA|Clima|Lluvia fuerte y rayos","FANTASMA|Espectro|Espíritu o aparición","LINTERNA|Luz|Luz portátil","VICTORIA|Éxito|Triunfo en competencia","PASAJERO|Viajero|Persona que viaja","ESTACION|Lugar|Parada o época","SOMBRERO|Prenda|Para cubrir la cabeza","UNIVERSO|Todo|Todo lo que existe","MISTERIO|Enigma|Algo incomprensible","ELEFANTE|Animal|Mamífero enorme","TESORERO|Finanzas|Cuida los fondos","INVIERNO|Estación|Época de frío","GUERRERO|Luchador|Combatiente audaz","PIRAMIDE|Monumento|Construcción cónica","FARMACIA|Medicina|Lugar de medicamentos","HOSPITAL|Salud|Centro médico","GOBIERNO|Política|Autoridad estatal","SOCIEDAD|Comunidad|Conjunto de personas","LENGUAJE|Idioma|Sistema de comunicación","COMERCIO|Negocios|Compra y venta","MERCADOS|Comercio|Lugares de venta","NEGOCIOS|Empresa|Actividades comerciales","FINANZAS|Dinero|Manejo de dinero","ECONOMIA|Ciencia|Ciencia de recursos","POLITICA|Gobierno|Asuntos de Estado","RELIGION|Creencia|Sistema de fe","DEPORTES|Juegos|Actividad física","OLIMPICO|Deporte|De los juegos","MEDALLAS|Premio|Premios metálicos","DERROTAS|Fracaso|Pérdidas en juego","ARBITROS|Jueces|Jueces deportivos","ESTADIOS|Recintos|Donde se juega","ALFOMBRA|Decoración|Cubre el piso","ANIMALES|Seres|Seres vivos que se mueven","REPTILES|Animales|Como serpientes y lagartos","MAMIFERO|Animal|Que amamanta","DELFINES|Mar|Mamíferos marinos","MAQUINAS|Aparatos|Aparatos mecánicos","CAMIONES|Vehículos|Transporte pesado","VEHICULO|Transporte|Medio de transporte",
+
+            // 9 LETRAS (50)
+            "EVOLUCION|Cambio|Transformación gradual","SABIDURIA|Intelecto|Gran conocimiento","HORIZONTE|Línea|Línea del paisaje","ESCULTURA|Arte|Arte en volumen","MARAVILLA|Admiración|Algo asombroso","VELOCIDAD|Rapidez|Rapidez de marcha","GEOGRAFIA|Ciencia|Estudio terrestre","MITOLOGIA|Mitos|Mitos ancestrales","SOMBRILLA|Protección|Para cubrirse del sol","AUTOMATAS|Robots|Máquinas autónomas","PASAPORTE|Documento|Para viajar al exterior","BIOLOGIAS|Estudio|Ciencias de la vida","TELEFONIA|Red|Comunicación a distancia","DIAMANTES|Gemas|Piedras preciosas","NAVEGANTE|Marino|Piloto de barco","OCULTISMO|Misterio|Ciencias secretas","ACTIVIDAD|Acción|Acción en marcha","ELECTRICO|Energía|Funciona con electricidad","COCODRILO|Reptil|Reptil de río","SATELITES|Astros|Objetos en órbita","CAMPEONES|Ganadores|Los mejores del torneo","ORQUIDEAS|Flores|Flores muy exóticas","COLECCION|Conjunto|Cosas reunidas","REFLEXION|Pensamiento|Análisis mental","ALQUIMIAS|Ciencia|Antigua química","PRIMAVERA|Estación|Época de flores","ASTEROIDE|Roca|Roca espacial","RADIACION|Energía|Emisión de energía","PARTICULA|Materia|Fragmento diminuto","MOLECULAS|Química|Uniones de átomos","ELEMENTOS|Componentes|Partes de un todo","COMPUESTO|Mezcla|Sustancia mezclada","SUSTANCIA|Materia|Materia con propiedades","PLASTICOS|Material|Material moldeable","MINERALES|Rocas|Elementos naturales","CRISTALES|Vidrios|Materiales transparentes","INDUSTRIA|Fábricas|Producción masiva","JUGADORES|Deporte|Quienes juegan","DESCUBRIR|Hallazgo|Encontrar algo nuevo","ENSEÑANZA|Educación|Transmisión de saber","EDUCACION|Escuela|Formación académica","HERRERIAS|Taller|Donde trabajan metal","BANQUEROS|Finanzas|Dueños de bancos","BOLIGRAFO|Escritura|Pluma con tinta","CAFETALES|Cultivo|Plantaciones de café","CARNICERO|Oficio|Vendedor de carne","CARAMELOS|Dulces|Golosinas de azúcar","CHOCOLATE|Dulce|Del cacao","DICIEMBRE|Mes|Último mes del año","NOVIEMBRE|Mes|Penúltimo mes",
+
+            // 10 LETRAS (50)
+            "NATURALEZA|Entorno|Mundo natural vivo","TECNOLOGIA|Innovación|Avances científicos","LITERATURA|Arte|Arte de escribir","ASTRONOMIA|Ciencia|Estudio de los astros","DIVERSIDAD|Variedad|Gran multiplicidad","FOTOGRAFIA|Arte|Capturar imágenes","REVOLUCION|Cambio|Cambio radical","EXPLORADOR|Viajero|Descubridor de lugares","RESPLANDOR|Brillo|Luz muy brillante","ASTRONAUTA|Viajero|Viajero espacial","DINOSAURIO|Reptil|Reptil prehistórico","FANTASTICO|Irreal|Algo extraordinario","CAMPEONATO|Torneo|Competencia mayor","ESTUDIANTE|Alumno|Quien aprende","MATEMATICA|Ciencia|Ciencia de números","ALQUIMISTA|Sabio|Buscador mágico","VIDEOJUEGO|Juego|Juego electrónico","MULTIVERSO|Espacio|Universos paralelos","VELOCIPEDO|Vehículo|Antecesor de la bici","BIODIVERSO|Naturaleza|Rico en especies","TELEVISION|Pantalla|Caja que transmite imágenes","PSICOLOGIA|Ciencia|Estudio de la mente","CONTINENTE|Tierra|Gran masa terrestre","DEMOCRACIA|Política|Sistema de gobierno","PERIODISMO|Noticias|Profesión de informar","ARQUITECTO|Diseñador|Diseña edificios","CARPINTERO|Oficio|Trabajador de la madera","INGENIERIA|Ciencia|Aplicación de ciencia","DESARROLLO|Crecimiento|Evolución progresiva","INNOVACION|Novedad|Creación de lo nuevo","EXTRANJERO|Foráneo|De otro país","CIENTIFICO|Experto|Investigador de ciencia","INVESTIGAR|Estudio|Buscar respuestas","ACADEMICOS|Educación|Expertos universitarios","PROFESORES|Maestros|Quienes enseñan","GANADERIAS|Agricultura|Cría de animales","INGENIEROS|Profesión|Profesionales técnicos","ENFERMEROS|Salud|Asistentes médicos","DETECTIVES|Policía|Investigadores privados","ESCRITORES|Autores|Creadores de libros","DIRECTORES|Líderes|Jefes o cineastas","VENDEDORES|Comercio|Quienes venden","CAMIONETAS|Vehículos|Autos de carga","BICICLETAS|Transporte|Vehículos a pedal","DEFINICION|Concepto|Significado exacto","ESCULTURAS|Arte|Obras talladas","ESTRUCTURA|Armazón|Base de un edificio","HABITACION|Cuarto|Espacio en una casa","AEROPLANOS|Aviación|Aviones antiguos","MECANISMOS|Sistemas|Partes que se mueven",
+
+            // 11 LETRAS (50)
+            "CREATIVIDAD|Imaginación|Facultad inventiva","IMAGINACION|Mente|Creación mental","INSPIRACION|Arte|Chispa creativa","DICCIONARIO|Libro|Libro de palabras","ESPECTACULO|Función|Show público","COMPUTADORA|Tecnología|Ordenador personal","ESTUDIANTES|Alumnos|Quienes aprenden","MOTOCICLETA|Vehículo|Vehículo motorizado de dos ruedas","HELICOPTERO|Aeronave|Aeronave con hélices","EXPLORACION|Viaje|Búsqueda de lo desconocido","FERROCARRIL|Transporte|Sistema de trenes","TRANSBORDAR|Viaje|Cambiar de transporte","AMBULANCIAS|Salud|Vehículos de emergencia","RESTAURANTE|Comida|Lugar para comer","INGREDIENTE|Cocina|Parte de una receta","AGRICULTURA|Campo|Cultivo de la tierra","PESCADERIAS|Comercio|Donde venden peces","CARNICERIAS|Comercio|Venta de carnes","PASTELERIAS|Comercio|Venta de dulces y pasteles","CARPINTERIA|Taller|Taller de madera","FONTANERIAS|Oficio|Trabajos de tuberías","CERRAJERIAS|Oficio|Fabricación de llaves","PROGRAMADOR|Tecnología|Creador de software","ARQUITECTOS|Profesión|Diseñadores de casas","VETERINARIO|Salud|Médico de animales","ODONTOLOGOS|Salud|Médicos de dientes","PARAMEDICOS|Salud|Personal de emergencia","PERIODISTAS|Noticias|Reportan la verdad","HISTORIADOR|Estudio|Experto en el pasado","CIENTIFICOS|Ciencia|Investigadores exactos","ASTRONAUTAS|Espacio|Viajeros del cosmos","MATEMATICOS|Ciencia|Expertos en números","ESTADISTICA|Matemática|Análisis de datos","PORCENTAJES|Matemática|Medidas proporcionales","MULTIPLICAR|Operación|Operación matemática","EXAMINACION|Prueba|Evaluación rigurosa","RENDIMIENTO|Desempeño|Capacidad de trabajo","CONTESTARON|Respuesta|Verbo responder","INFORMACION|Datos|Conjunto de datos","COMUNICADOR|Medios|Persona que transmite","TRANSMISION|Señal|Emisión de datos","FRECUENCIAS|Física|Ondas repetitivas","RADIOGRAFIA|Medicina|Imagen de huesos","ULTRASONIDO|Medicina|Eco médico","TRATAMIENTO|Salud|Cura médica","ANTIBIOTICO|Medicina|Medicina para infecciones","INYECCIONES|Medicina|Vacunas aplicadas","TERMOMETROS|Salud|Miden la temperatura","SENTIMIENTO|Emoción|Estado de ánimo","ADOLESCENTE|Juventud|Etapa antes de ser adulto",
+
+            // 12 LETRAS (50)
+            "CONSTITUCION|Ley|Ley máxima de un país","INVESTIGADOR|Ciencia|Quien busca respuestas","TRANQUILIDAD|Paz|Estado de profunda calma","CONOCIMIENTO|Saber|Información aprendida","ARCHIPIELAGO|Islas|Conjunto de islas","ASTRONOMICOS|Espacio|Relativo al cosmos","NACIONALIDAD|Origen|País de procedencia","DEMOCRATICOS|Política|Sistemas de libertad","LEGISLADORES|Política|Quienes hacen las leyes","JURISDICCION|Ley|Autoridad legal","DEPARTAMENTO|División|Área de un lugar","AYUNTAMIENTO|Gobierno|Gobierno de ciudad","SUPERVISORES|Trabajo|Quienes controlan tareas","TRABAJADORES|Empleo|Quienes laboran","PRESTAMISTAS|Finanzas|Quien da dinero","CONSUMIDORES|Comercio|Quienes compran","DISTRIBUIDOR|Comercio|Quien reparte","EXPORTADORES|Comercio|Venden al exterior","IMPORTADORES|Comercio|Compran del exterior","COMERCIANTES|Negocios|Vendedores formales","ADOLESCENCIA|Etapa|Transición a la adultez","PALEONTOLOGO|Ciencia|Estudia los fósiles","BACTERIOLOGO|Ciencia|Estudia las bacterias","MICROBIOLOGO|Ciencia|Estudia los microbios","EPIDEMIOLOGO|Medicina|Experto en epidemias","METEOROLOGOS|Clima|Expertos en clima","CLIMATOLOGIA|Estudio|Ciencia del clima","OCEANOGRAFIA|Ciencia|Estudio de los mares","VULCANOLOGIA|Ciencia|Estudio de los volcanes","SISMOLOGICOS|Geología|Relativo a temblores","AEROESPACIAL|Tecnología|Ciencia del espacio","POLARIZACION|Física|Efecto magnético o visual","ELECTRICIDAD|Energía|Energía de corriente","FLUORESCENTE|Luz|Luz que brilla intensamente","CRISTALIZADO|Química|Convertido en cristal","METAMORFOSIS|Biología|Transformación biológica","FOTOSINTESIS|Plantas|Proceso verde de plantas","REPRODUCCION|Biología|Creación de vida","RESPIRATORIO|Cuerpo|Sistema para respirar","CIRCULATORIO|Cuerpo|Sistema de la sangre","NEUROLOGICOS|Medicina|De los nervios","PSICOLOGICOS|Mente|Relativo a la mente","PSIQUIATRICO|Salud|Hospital mental","TERAPEUTICOS|Curación|Tratamientos de cura","REHABILITADO|Salud|Persona que se ha curado","FARMACEUTICO|Medicina|Químico de medicinas","ODONTOLOGICO|Salud|Relativo a los dientes","OFTALMOLOGOS|Salud|Médicos de los ojos","DERMATOLOGOS|Salud|Médicos de la piel","TRAUMATOLOGO|Salud|Médicos de los huesos"
+        ];
+
+        const DICTIONARY = rawData.map(line => {
+            const [word, shortDesc, longDesc] = line.split('|');
+            return { word, shortDesc, longDesc };
+        });
+
+        document.getElementById('total-words-count').textContent = DICTIONARY.length;
+
+        // Game State Variables
+        let currentWordObj = null;
+        let targetWord = "";
+        let maxAttempts = 6;
+        let currentAttempt = 0;
+        let currentGuess = "";
+        let gameOver = false;
+        
+        // Stats
+        let userStats = { won: 0, lost: 0, played: 0, streak: 0 };
+        const LOCAL_STATS_KEY = 'palabra_secreta_stats';
+        
+        // Load Local Stats
+        function loadLocalStats() {
+            try {
+                const stored = localStorage.getItem(LOCAL_STATS_KEY);
+                if (stored) userStats = JSON.parse(stored);
+            } catch (e) { console.error("Error reading stats"); }
+            updateStatsUI();
+        }
+
+        function saveLocalStats() {
+            try {
+                localStorage.setItem(LOCAL_STATS_KEY, JSON.stringify(userStats));
+            } catch (e) { console.error("Error saving stats"); }
+            updateStatsUI();
+        }
+
+        function updateStatsUI() {
+            document.getElementById("stat-won").textContent = userStats.won;
+            document.getElementById("stat-lost").textContent = userStats.lost;
+            document.getElementById("stat-played").textContent = userStats.played;
+            
+            const winRate = userStats.played > 0 ? Math.round((userStats.won / userStats.played) * 100) : 0;
+            document.getElementById("stat-winrate").textContent = `${winRate}%`;
+            document.getElementById("stat-streak").textContent = userStats.streak;
+        }
+
+        const boardEl = document.getElementById("board");
+        const messageEl = document.getElementById("game-message");
+        const hintBox = document.getElementById("hint-box");
+        const clueText = document.getElementById("clue-text");
+        const restartBtn = document.getElementById("restart-btn");
+        const keys = document.querySelectorAll(".key-btn");
+        const keyboardEl = document.getElementById("keyboard");
+
+        // Modals
         const statsBtn = document.getElementById("stats-btn");
         const statsModal = document.getElementById("stats-modal");
         const closeStatsBtn = document.getElementById("close-stats-btn");
@@ -411,60 +474,339 @@
         const closeHelpBtn = document.getElementById("close-help-btn");
         const modalHelpCloseAction = document.getElementById("modal-help-close-action");
 
-        // Elementos de Recomendar Palabra
         const suggestBtn = document.getElementById("suggest-btn");
         const suggestModal = document.getElementById("suggest-modal");
         const closeSuggestBtn = document.getElementById("close-suggest-btn");
         const suggestForm = document.getElementById("suggest-form");
 
-        // Elementos de Reportar Bug
         const bugBtn = document.getElementById("bug-btn");
         const bugModal = document.getElementById("bug-modal");
         const closeBugBtn = document.getElementById("close-bug-btn");
         const bugForm = document.getElementById("bug-form");
-        const bugPhotoInput = document.getElementById("bug-photo");
-        const photoLabel = document.getElementById("photo-label");
-        const photoPreviewBox = document.getElementById("photo-preview-box");
-        const photoPreviewImg = document.getElementById("photo-preview-img");
-        const photoName = document.getElementById("photo-name");
-        const removePhotoBtn = document.getElementById("remove-photo-btn");
 
-        const INSTAGRAM_URL = "https://www.instagram.com/marcenaroc64?igsi=MTkwa2xtcXhtdHl3OA%3D%3D";
+        const INSTAGRAM_URL = "https://www.instagram.com/marcenaroc64";
 
-        function copyToClipboard(text) {
-            if (navigator.clipboard && window.isSecureContext) {
-                return navigator.clipboard.writeText(text);
-            } else {
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                textArea.style.position = "fixed";
-                textArea.style.left = "-999999px";
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                } catch (err) {
-                    console.error('Error al copiar:', err);
+        function initGame() {
+            // Pick a random word
+            currentWordObj = DICTIONARY[Math.floor(Math.random() * DICTIONARY.length)];
+            targetWord = currentWordObj.word.toUpperCase();
+            currentAttempt = 0;
+            currentGuess = "";
+            gameOver = false;
+            
+            // Reset UI
+            boardEl.innerHTML = "";
+            hintBox.classList.add("hidden", "opacity-0", "scale-95");
+            hintBox.classList.remove("pulse-glow");
+            restartBtn.classList.add("hidden");
+            
+            // Reset Keyboard colors
+            keys.forEach(key => {
+                key.classList.remove("tile-correct", "tile-present", "tile-absent", "bg-indigo-600", "bg-rose-600", "text-white");
+                // Restore default styles for letters
+                if (key.dataset.key !== "ENTER" && key.dataset.key !== "BACK") {
+                    key.className = "key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-90 transition-all font-bold py-3 rounded-lg text-xs md:text-sm shadow-md text-white";
                 }
-                document.body.removeChild(textArea);
-                return Promise.resolve();
+            });
+
+            // Re-apply specific colors for Enter/Back
+            document.querySelector('[data-key="ENTER"]').classList.add("bg-indigo-600", "hover:bg-indigo-500");
+            document.querySelector('[data-key="BACK"]').classList.add("bg-rose-600", "hover:bg-rose-500");
+
+            // Build grid based on word length
+            for (let i = 0; i < maxAttempts; i++) {
+                const row = document.createElement("div");
+                const gapClass = targetWord.length > 10 ? "gap-0.5" : targetWord.length > 7 ? "gap-1" : "gap-1.5"; 
+                row.className = `flex ${gapClass} w-full justify-center`;
+                row.id = `row-${i}`;
+                
+                for (let j = 0; j < targetWord.length; j++) {
+                    const cell = document.createElement("div");
+                    
+                    let sizeClass = "w-10 h-10 md:w-12 md:h-12 text-xl";
+                    if (targetWord.length > 10) sizeClass = "w-5 h-5 md:w-7 md:h-7 text-[10px] md:text-sm";
+                    else if (targetWord.length > 8) sizeClass = "w-6 h-6 md:w-8 md:h-8 text-xs md:text-sm";
+                    else if (targetWord.length > 6) sizeClass = "w-7 h-7 md:w-9 md:h-9 text-sm md:text-base";
+                    else if (targetWord.length > 4) sizeClass = "w-8 h-8 md:w-10 md:h-10 text-lg";
+
+                    cell.className = `${sizeClass} bg-white/5 border-2 border-white/10 rounded-lg flex items-center justify-center font-bold uppercase transition-all duration-300 shadow-sm`;
+                    cell.id = `cell-${i}-${j}`;
+                    row.appendChild(cell);
+                }
+                boardEl.appendChild(row);
             }
         }
 
-        // Modales de Recomendar
-        function openSuggestModal() {
-            suggestModal.classList.remove("opacity-0", "pointer-events-none");
-            document.getElementById("suggest-modal-content").classList.remove("scale-90");
-            document.getElementById("suggest-modal-content").classList.add("scale-100");
+        function showMessage(msg, duration = 2500) {
+            messageEl.textContent = msg;
+            messageEl.classList.remove("opacity-0");
+            setTimeout(() => {
+                messageEl.classList.add("opacity-0");
+            }, duration);
         }
-        function closeSuggestModal() {
-            suggestModal.classList.add("opacity-0", "pointer-events-none");
-            document.getElementById("suggest-modal-content").classList.remove("scale-100");
-            document.getElementById("suggest-modal-content").classList.add("scale-90");
+
+        function updateBoardUI() {
+            const row = document.getElementById(`row-${currentAttempt}`);
+            if(!row) return;
+            const cells = row.children;
+            
+            for (let i = 0; i < targetWord.length; i++) {
+                const cell = cells[i];
+                if (i < currentGuess.length) {
+                    cell.textContent = currentGuess[i];
+                    cell.classList.add("border-white/40", "pop-animation");
+                    // Remove animation class after it completes so it can trigger again if needed
+                    setTimeout(() => cell.classList.remove("pop-animation"), 200);
+                } else {
+                    cell.textContent = "";
+                    cell.classList.remove("border-white/40");
+                }
+            }
         }
-        suggestBtn.addEventListener("click", openSuggestModal);
-        closeSuggestBtn.addEventListener("click", closeSuggestModal);
+
+        function handleInput(key) {
+            if (gameOver) return;
+
+            if (key === "ENTER") {
+                submitGuess();
+            } else if (key === "BACK" || key === "BACKSPACE") {
+                if (currentGuess.length > 0) {
+                    currentGuess = currentGuess.slice(0, -1);
+                    updateBoardUI();
+                }
+            } else if (/^[A-ZÑ]$/.test(key)) {
+                if (currentGuess.length < targetWord.length) {
+                    currentGuess += key;
+                    updateBoardUI();
+                }
+            }
+        }
+
+        function submitGuess() {
+            if (currentGuess.length !== targetWord.length) {
+                showMessage("Faltan letras");
+                const row = document.getElementById(`row-${currentAttempt}`);
+                row.classList.add("shake-animation");
+                setTimeout(() => row.classList.remove("shake-animation"), 400);
+                return;
+            }
+
+            // Wordle logic for coloring
+            let targetChars = targetWord.split('');
+            let guessChars = currentGuess.split('');
+            let result = Array(targetWord.length).fill('absent');
+
+            // Pass 1: Find greens (correct position)
+            for (let i = 0; i < targetWord.length; i++) {
+                if (guessChars[i] === targetChars[i]) {
+                    result[i] = 'correct';
+                    targetChars[i] = null; // Mark used
+                    guessChars[i] = null;
+                }
+            }
+
+            // Pass 2: Find yellows (wrong position)
+            for (let i = 0; i < targetWord.length; i++) {
+                if (guessChars[i] !== null && targetChars.includes(guessChars[i])) {
+                    result[i] = 'present';
+                    targetChars[targetChars.indexOf(guessChars[i])] = null;
+                }
+            }
+
+            animateRow(result);
+        }
+
+        function animateRow(result) {
+            const row = document.getElementById(`row-${currentAttempt}`);
+            const cells = row.children;
+            let delay = 0;
+
+            for (let i = 0; i < cells.length; i++) {
+                setTimeout(() => {
+                    cells[i].classList.add("flip-tile");
+                    
+                    // Change color halfway through flip
+                    setTimeout(() => {
+                        cells[i].classList.remove("bg-white/5", "border-white/10", "border-white/40");
+                        if (result[i] === 'correct') {
+                            cells[i].classList.add("tile-correct", "border-transparent");
+                            updateKeyboardColor(currentGuess[i], 'correct');
+                        } else if (result[i] === 'present') {
+                            cells[i].classList.add("tile-present", "border-transparent");
+                            updateKeyboardColor(currentGuess[i], 'present');
+                        } else {
+                            cells[i].classList.add("tile-absent", "border-transparent");
+                            updateKeyboardColor(currentGuess[i], 'absent');
+                        }
+                    }, 300); // Half of flip duration
+
+                }, delay);
+                delay += 150; // Stagger effect
+            }
+
+            // Wait for all animations to finish before moving to next state
+            setTimeout(() => {
+                checkGameState();
+            }, delay + 300);
+        }
+
+        function updateKeyboardColor(letter, status) {
+            const keyBtn = document.querySelector(`.key-btn[data-key="${letter}"]`);
+            if (!keyBtn) return;
+
+            // Prioritize correct > present > absent
+            if (keyBtn.classList.contains("tile-correct")) return; 
+            
+            if (status === 'correct') {
+                keyBtn.classList.remove("tile-present", "tile-absent", "bg-white/20");
+                keyBtn.classList.add("tile-correct");
+            } else if (status === 'present' && !keyBtn.classList.contains("tile-correct")) {
+                keyBtn.classList.remove("tile-absent", "bg-white/20");
+                keyBtn.classList.add("tile-present");
+            } else if (status === 'absent' && !keyBtn.classList.contains("tile-correct") && !keyBtn.classList.contains("tile-present")) {
+                keyBtn.classList.remove("bg-white/20");
+                keyBtn.classList.add("tile-absent");
+            }
+        }
+
+        function checkGameState() {
+            if (currentGuess === targetWord) {
+                gameOver = true;
+                showMessage("¡Magnífico! 🎉", 4000);
+                
+                // Show long hint as reward
+                clueText.textContent = currentWordObj.longDesc;
+                hintBox.classList.remove("hidden", "opacity-0", "scale-95");
+                hintBox.classList.add("pulse-glow");
+
+                // Update Stats
+                userStats.won++;
+                userStats.played++;
+                userStats.streak++;
+                saveLocalStats();
+                
+                restartBtn.classList.remove("hidden");
+                keyboardEl.classList.add("opacity-50", "pointer-events-none");
+                return;
+            }
+
+            currentAttempt++;
+
+            if (currentAttempt >= maxAttempts) {
+                gameOver = true;
+                showMessage(`La palabra era: ${targetWord}`, 5000);
+                
+                // Show long hint on loss (which is the last attempt)
+                clueText.textContent = currentWordObj.longDesc;
+                hintBox.classList.remove("hidden", "opacity-0", "scale-95");
+                hintBox.classList.remove("pulse-glow");
+
+                // Update Stats
+                userStats.lost++;
+                userStats.played++;
+                userStats.streak = 0;
+                saveLocalStats();
+
+                restartBtn.classList.remove("hidden");
+                keyboardEl.classList.add("opacity-50", "pointer-events-none");
+            } else {
+                currentGuess = "";
+                
+                // Show short hint on attempt maxAttempts - 2 (antepenúltimo)
+                if (currentAttempt === maxAttempts - 2) {
+                    clueText.textContent = currentWordObj.shortDesc;
+                    hintBox.classList.remove("hidden", "opacity-0", "scale-95");
+                }
+                // Show long hint on attempt maxAttempts - 1 (penúltimo)
+                else if (currentAttempt === maxAttempts - 1) {
+                    clueText.textContent = currentWordObj.longDesc;
+                    hintBox.classList.remove("hidden", "opacity-0", "scale-95");
+                }
+            }
+        }
+
+        // Keyboard clicks
+        keys.forEach(btn => {
+            btn.addEventListener("click", () => {
+                handleInput(btn.dataset.key);
+                // Haptic feedback simulation
+                if (navigator.vibrate) navigator.vibrate(10);
+            });
+        });
+
+        // Physical Keyboard
+        document.addEventListener("keydown", (e) => {
+            if(gameOver) return;
+            // Ignore if typing in inputs
+            if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
+            
+            const key = e.key.toUpperCase();
+            if (key === "ENTER" || key === "BACKSPACE" || /^[A-ZÑ]$/.test(key)) {
+                e.preventDefault();
+                handleInput(key === "BACKSPACE" ? "BACK" : key);
+            }
+        });
+
+        restartBtn.addEventListener("click", () => {
+            keyboardEl.classList.remove("opacity-50", "pointer-events-none");
+            initGame();
+        });
+
+        // Modal Logic Helper
+        function toggleModal(modal, content, show) {
+            if (show) {
+                modal.classList.remove("opacity-0", "pointer-events-none");
+                content.classList.remove("scale-90");
+                content.classList.add("scale-100");
+            } else {
+                modal.classList.add("opacity-0", "pointer-events-none");
+                content.classList.remove("scale-100");
+                content.classList.add("scale-90");
+            }
+        }
+
+        // Stats Modal
+        const openStats = () => { updateStatsUI(); toggleModal(statsModal, document.getElementById("stats-modal-content"), true); };
+        const closeStats = () => toggleModal(statsModal, document.getElementById("stats-modal-content"), false);
+        statsBtn.addEventListener("click", openStats);
+        closeStatsBtn.addEventListener("click", closeStats);
+        modalCloseAction.addEventListener("click", closeStats);
+
+        // Help Modal
+        const openHelp = () => toggleModal(helpModal, document.getElementById("help-modal-content"), true);
+        const closeHelp = () => toggleModal(helpModal, document.getElementById("help-modal-content"), false);
+        helpBtn.addEventListener("click", openHelp);
+        closeHelpBtn.addEventListener("click", closeHelp);
+        modalHelpCloseAction.addEventListener("click", closeHelp);
+
+        // Suggest Modal
+        const openSuggest = () => toggleModal(suggestModal, document.getElementById("suggest-modal-content"), true);
+        const closeSuggest = () => toggleModal(suggestModal, document.getElementById("suggest-modal-content"), false);
+        suggestBtn.addEventListener("click", openSuggest);
+        closeSuggestBtn.addEventListener("click", closeSuggest);
+
+        // Bug Modal
+        const openBug = () => toggleModal(bugModal, document.getElementById("bug-modal-content"), true);
+        const closeBug = () => toggleModal(bugModal, document.getElementById("bug-modal-content"), false);
+        bugBtn.addEventListener("click", openBug);
+        closeBugBtn.addEventListener("click", closeBug);
+
+        function copyToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Error al copiar', err);
+            }
+            document.body.removeChild(textArea);
+            return Promise.resolve();
+        }
 
         suggestForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -472,806 +814,64 @@
             const shortDesc = document.getElementById("suggest-short").value.trim();
             const longDesc = document.getElementById("suggest-long").value.trim();
 
-            const messagePayload = `💡 *RECOMENDACIÓN DE PALABRA*\n\n` +
-                                  `• Palabra: ${word}\n` +
-                                  `• Descripción corta: ${shortDesc}\n` +
-                                  `• Descripción larga: ${longDesc}\n\n` +
-                                  `Enviado desde Palabra Secreta App`;
+            const msg = `💡 *NUEVA PALABRA*\n\n• Palabra: ${word}\n• Pista: ${shortDesc}\n• Final: ${longDesc}\n\nEnviado desde App`;
 
-            await copyToClipboard(messagePayload);
-            showMessage("📋 Mensaje copiado. Redirigiendo a Instagram...");
-            closeSuggestModal();
-            suggestForm.reset();
-
+            await copyToClipboard(msg);
+            closeSuggest();
+            showMessage("Texto copiado. Abriendo Instagram...", 3000);
             setTimeout(() => {
-                window.open(INSTAGRAM_URL, "_blank");
-            }, 800);
-        });
-
-        // Modales de Bug
-        function openBugModal() {
-            bugModal.classList.remove("opacity-0", "pointer-events-none");
-            document.getElementById("bug-modal-content").classList.remove("scale-90");
-            document.getElementById("bug-modal-content").classList.add("scale-100");
-        }
-        function closeBugModal() {
-            bugModal.classList.add("opacity-0", "pointer-events-none");
-            document.getElementById("bug-modal-content").classList.remove("scale-100");
-            document.getElementById("bug-modal-content").classList.add("scale-90");
-        }
-        bugBtn.addEventListener("click", openBugModal);
-        closeBugBtn.addEventListener("click", closeBugModal);
-
-        bugPhotoInput.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                photoName.textContent = file.name;
-                photoLabel.textContent = "Cambiar captura";
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    photoPreviewImg.src = evt.target.result;
-                    photoPreviewBox.classList.remove("hidden");
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        removePhotoBtn.addEventListener("click", () => {
-            bugPhotoInput.value = "";
-            photoLabel.textContent = "Adjuntar captura de pantalla";
-            photoPreviewBox.classList.add("hidden");
-            photoPreviewImg.src = "";
+                window.open(INSTAGRAM_URL, '_blank');
+                suggestForm.reset();
+            }, 1000);
         });
 
         bugForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const bugDesc = document.getElementById("bug-desc").value.trim();
-            const hasPhoto = bugPhotoInput.files.length > 0;
+            const desc = document.getElementById("bug-desc").value.trim();
 
-            const messagePayload = `🐛 *REPORTE DE BUG*\n\n` +
-                                  `• Descripción del fallo: ${bugDesc}\n` +
-                                  `• Adjunta foto/captura: ${hasPhoto ? "Sí (la enviaré en el chat)" : "No"}\n\n` +
-                                  `Enviado desde Palabra Secreta App`;
+            const msg = `🐛 *REPORTE DE BUG*\n\nDescripción: ${desc}\n\nEnviado desde App`;
 
-            await copyToClipboard(messagePayload);
-            showMessage("📋 Reporte copiado. Abriendo Instagram...");
-            closeBugModal();
-            bugForm.reset();
-            photoPreviewBox.classList.add("hidden");
-            photoLabel.textContent = "Adjuntar captura de pantalla";
-
+            await copyToClipboard(msg);
+            closeBug();
+            showMessage("Reporte copiado. Abriendo Instagram...", 3000);
             setTimeout(() => {
-                window.open(INSTAGRAM_URL, "_blank");
-            }, 800);
+                window.open(INSTAGRAM_URL, '_blank');
+                bugForm.reset();
+            }, 1000);
         });
 
-        async function initAuth() {
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.warn("Auth inicial fallback:", err);
-                try {
-                    await signInAnonymously(auth);
-                } catch (e) {
-                    console.error("Error al firmar anónimamente:", e);
-                }
-            }
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                updateUserUI(user);
-                subscribeToUserStats(user.uid);
-            } else {
-                updateUserUI(null);
-            }
+        // Mock Auth Logic to keep UI functional without valid Firebase keys
+        document.getElementById("auth-btn").addEventListener("click", () => {
+            showMessage("La autenticación en la nube está simulada en esta versión.");
         });
 
-        function updateUserUI(user) {
-            if (user && !user.isAnonymous) {
-                userNameEl.textContent = user.displayName || user.email || "Usuario Google";
-                userStatusEl.textContent = "Conectado";
-                authBtn.innerHTML = `<span>Salir</span>`;
-                authBtn.className = "bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-bold text-xs px-3 py-2 rounded-xl shadow-md transition-all flex items-center gap-1";
-                
-                if (user.photoURL) {
-                    userAvatarEl.innerHTML = `<img src="${user.photoURL}" class="w-full h-full rounded-full object-cover" onerror="this.src=''"/>`;
-                } else {
-                    userAvatarEl.textContent = (user.displayName || "G").charAt(0).toUpperCase();
-                }
-            } else {
-                userNameEl.textContent = "Invitado";
-                userStatusEl.textContent = "Modo Local";
-                authBtn.innerHTML = `<span>Google 🔑</span>`;
-                authBtn.className = "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 active:scale-95 text-white font-bold text-xs px-3 py-2 rounded-xl shadow-md transition-all flex items-center gap-1";
-                userAvatarEl.textContent = "👤";
-            }
-        }
+        // Initialize App
+        loadLocalStats();
+        initGame();
 
-        authBtn.addEventListener("click", async () => {
-            if (currentUser && !currentUser.isAnonymous) {
-                try {
-                    await signOut(auth);
-                    await signInAnonymously(auth);
-                } catch (e) {
-                    console.error("Error signing out:", e);
-                }
-            } else {
-                try {
-                    const provider = new GoogleAuthProvider();
-                    await signInWithPopup(auth, provider);
-                } catch (e) {
-                    console.error("Error al iniciar sesión con Google:", e);
-                    showMessage("Error al conectar con Google");
-                }
-            }
-        });
-
-        function subscribeToUserStats(userId) {
-            if (unsubscribeStats) unsubscribeStats();
-
-            const statsDocRef = doc(db, 'artifacts', appId, 'users', userId, 'gameData', 'stats');
-
-            unsubscribeStats = onSnapshot(statsDocRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.data();
-                    userStats = {
-                        won: data.won || 0,
-                        lost: data.lost || 0,
-                        played: data.played || 0,
-                        streak: data.streak || 0
-                    };
-                } else {
-                    userStats = { won: 0, lost: 0, played: 0, streak: 0 };
-                }
-                renderStatsUI();
-            }, (error) => {
-                console.error("Error listening to stats:", error);
-            });
-        }
-
-        async function recordGameResult(didWin) {
-            if (!currentUser) return;
-
-            const userId = currentUser.uid;
-            const statsDocRef = doc(db, 'artifacts', appId, 'users', userId, 'gameData', 'stats');
-
-            const newWon = userStats.won + (didWin ? 1 : 0);
-            const newLost = userStats.lost + (didWin ? 0 : 1);
-            const newPlayed = userStats.played + 1;
-            const newStreak = didWin ? (userStats.streak + 1) : 0;
-
-            userStats = {
-                won: newWon,
-                lost: newLost,
-                played: newPlayed,
-                streak: newStreak
-            };
-
-            try {
-                await setDoc(statsDocRef, userStats, { merge: true });
-                renderStatsUI();
-            } catch (err) {
-                console.error("Error guardando estadísticas:", err);
-            }
-        }
-
-        function renderStatsUI() {
-            document.getElementById("stat-won").textContent = userStats.won;
-            document.getElementById("stat-lost").textContent = userStats.lost;
-            document.getElementById("stat-played").textContent = userStats.played;
-            
-            const winrate = userStats.played > 0 
-                ? Math.round((userStats.won / userStats.played) * 100) 
-                : 0;
-            document.getElementById("stat-winrate").textContent = `${winrate}%`;
-            document.getElementById("stat-streak").textContent = userStats.streak;
-
-            const label = (currentUser && !currentUser.isAnonymous) 
-                ? `Guardado Cloud: ${currentUser.displayName || currentUser.email}`
-                : "Progreso Local (Inicia sesión para sincronizar)";
-            document.getElementById("stats-user-label").textContent = label;
-        }
-
-        function openStatsModal() {
-            renderStatsUI();
-            statsModal.classList.remove("opacity-0", "pointer-events-none");
-            document.getElementById("stats-modal-content").classList.remove("scale-90");
-            document.getElementById("stats-modal-content").classList.add("scale-100");
-        }
-
-        function closeStatsModal() {
-            statsModal.classList.add("opacity-0", "pointer-events-none");
-            document.getElementById("stats-modal-content").classList.remove("scale-100");
-            document.getElementById("stats-modal-content").classList.add("scale-90");
-        }
-
-        statsBtn.addEventListener("click", openStatsModal);
-        closeStatsBtn.addEventListener("click", closeStatsModal);
-        modalCloseAction.addEventListener("click", closeStatsModal);
-
-        function openHelpModal() {
-            helpModal.classList.remove("opacity-0", "pointer-events-none");
-            document.getElementById("help-modal-content").classList.remove("scale-90");
-            document.getElementById("help-modal-content").classList.add("scale-100");
-        }
-
-        function closeHelpModal() {
-            helpModal.classList.add("opacity-0", "pointer-events-none");
-            document.getElementById("help-modal-content").classList.remove("scale-100");
-            document.getElementById("help-modal-content").classList.add("scale-90");
-        }
-
-        helpBtn.addEventListener("click", openHelpModal);
-        closeHelpBtn.addEventListener("click", closeHelpModal);
-        modalHelpCloseAction.addEventListener("click", closeHelpModal);
-
-        const words3 = [
-            { word: "SOL", clue: "Astro diurno que ilumina la Tierra.", shortClue: "Astro diurno" },
-            { word: "PAN", clue: "Alimento básico hecho de harina y fuego.", shortClue: "Alimento básico" },
-            { word: "LUZ", clue: "Lo primero que vence a las sombras.", shortClue: "Claridad" },
-            { word: "MAR", clue: "Inmensa masa de agua salada.", shortClue: "Agua salada" },
-            { word: "REY", clue: "Monarca soberano de un reino.", shortClue: "Gobernante" },
-            { word: "VOZ", clue: "Sonido producido por las cuerdas vocales.", shortClue: "Sonido vocal" },
-            { word: "ORO", clue: "Metal precioso de color amarillo brillante.", shortClue: "Metal precioso" },
-            { word: "RIO", clue: "Corriente natural de agua continua.", shortClue: "Cauce de agua" },
-            { word: "PAZ", clue: "Estado de tranquilidad sin conflictos.", shortClue: "Sin guerra" },
-            { word: "RED", clue: "Malla de hilos o conexiones de datos.", shortClue: "Malla o conexión" },
-            { word: "OLA", clue: "Onda formada en la superficie del agua.", shortClue: "Onda marina" },
-            { word: "SUR", clue: "Punto cardinal opuesto al norte.", shortClue: "Punto cardinal" },
-            { word: "AJO", clue: "Planta de bulbo blanco usado en cocina.", shortClue: "Condimento fuerte" },
-            { word: "DIA", clue: "Periodo iluminado por el sol.", shortClue: "Horas de luz" },
-            { word: "GAS", clue: "Estado fluido de la materia.", shortClue: "Estado fluido" },
-            { word: "LEY", clue: "Regla o norma establecida.", shortClue: "Norma legal" },
-            { word: "BAR", clue: "Lugar de reunión para tomar bebidas.", shortClue: "Establecimiento" },
-            { word: "BUS", clue: "Medio de transporte colectivo urbano.", shortClue: "Transporte" },
-            { word: "UVA", clue: "Fruta pequeña usada para hacer vino.", shortClue: "Fruta de vid" },
-            { word: "COL", clue: "Hortaliza de hojas apretadas.", shortClue: "Hortaliza" },
-            { word: "PIE", clue: "Base del cuerpo para caminar.", shortClue: "Extremidad" },
-            { word: "SAL", clue: "Sustancia blanca que sazona comida.", shortClue: "Condimento marino" },
-            { word: "VIA", clue: "Camino o carril de tránsito.", shortClue: "Camino o carril" },
-            { word: "OJO", clue: "Órgano de la visión corporal.", shortClue: "Órgano visual" },
-            { word: "REO", clue: "Persona acusada o juzgada.", shortClue: "Acusado" }
-        ];
-
-        const words4 = [
-            { word: "CASA", clue: "Refugio que guarda memorias en paredes.", shortClue: "Vivienda" },
-            { word: "LUNA", clue: "Espejo nocturno que vigila los sueños.", shortClue: "Satélite nocturno" },
-            { word: "AGUA", clue: "Líquido esencial que da vida al mundo.", shortClue: "Líquido vital" },
-            { word: "AZUL", clue: "Color del cielo despejado.", shortClue: "Color del cielo" },
-            { word: "ROJO", clue: "Color del fuego y la sangre.", shortClue: "Color vivo" },
-            { word: "FLOR", clue: "Estructura colorida de las plantas.", shortClue: "Botánica colorida" },
-            { word: "GATO", clue: "Felino doméstico de mirada curiosa.", shortClue: "Felino doméstico" },
-            { word: "ISLA", clue: "Tierra rodeada completamente de agua.", shortClue: "Tierra en mar" },
-            { word: "VIDA", clue: "Existencia de seres vivos.", shortClue: "Existencia" },
-            { word: "NUBE", clue: "Masa flotante de vapor de agua en el cielo.", shortClue: "Vapor celeste" },
-            { word: "ARTE", clue: "Creación humana que expresa sentimientos.", shortClue: "Expresión humana" },
-            { word: "RUTA", clue: "Camino establecido para viajar.", shortClue: "Camino o viaje" },
-            { word: "AMOR", clue: "Sentimiento profundo de afecto.", shortClue: "Sentimiento puro" },
-            { word: "ROCA", clue: "Materia mineral dura y sólida.", shortClue: "Mineral sólido" },
-            { word: "AIRE", clue: "Mezcla gaseosa que respiramos.", shortClue: "Gas que respiramos" },
-            { word: "ALMA", clue: "Esencia espiritual de la persona.", shortClue: "Esencia espiritual" },
-            { word: "NAVE", clue: "Embarcación o vehículo espacial.", shortClue: "Vehículo o barco" },
-            { word: "MALA", clue: "Que carece de bondad o calidad.", shortClue: "Sin bondad" },
-            { word: "LAGO", clue: "Gran extensión de agua dulce rodeada de tierra.", shortClue: "Agua dulce" },
-            { word: "MESA", clue: "Mueble plano apoyado sobre patas.", shortClue: "Mueble llano" },
-            { word: "PINO", clue: "Árbol de hoja perenne y forma cónica.", shortClue: "Árbol cónico" },
-            { word: "PASO", clue: "Movimiento hecho al caminar.", shortClue: "Movimiento de pie" },
-            { word: "RAYO", clue: "Línea de luz o descarga eléctrica.", shortClue: "Descarga de luz" },
-            { word: "MIEL", clue: "Sustancia dulce producida por abejas.", shortClue: "Dulzura de abejas" },
-            { word: "LEON", clue: "Gran felino considerado el rey de la selva.", shortClue: "Felino melenudo" }
-        ];
-
-        const words5 = [
-            { word: "PERRO", clue: "Compañero leal de cuatro patas.", shortClue: "Mascota leal" },
-            { word: "PLAYA", clue: "Costa de arena donde rompen las olas.", shortClue: "Costa de arena" },
-            { word: "LIBRO", clue: "Conjunto de hojas encuadernadas con historia.", shortClue: "Objeto de lectura" },
-            { word: "FUEGO", clue: "Energía indomable que da calor y luz.", shortClue: "Llama y calor" },
-            { word: "MUNDO", clue: "El planeta Tierra o la sociedad humana.", shortClue: "El planeta" },
-            { word: "SABIO", clue: "Persona con profunda sabiduría.", shortClue: "Persona experta" },
-            { word: "RELOJ", clue: "Instrumento que mide el tiempo.", shortClue: "Mide el tiempo" },
-            { word: "VALLE", clue: "Terreno llano entre montañas.", shortClue: "Entre montañas" },
-            { word: "TIGRE", clue: "Gran felino de pelaje anaranjado rayado.", shortClue: "Felino rayado" },
-            { word: "SUEÑO", clue: "Imágenes o deseos al descansar.", shortClue: "Imaginación al dormir" },
-            { word: "MAGIA", clue: "Arte o poder misterioso de ilusión.", shortClue: "Arte ilusorio" },
-            { word: "BARCO", clue: "Embarcación para navegar aguas.", shortClue: "Vehículo marítimo" },
-            { word: "CIELO", clue: "Esfera celeste vista desde la Tierra.", shortClue: "Bóveda celeste" },
-            { word: "ARBOL", clue: "Planta de tronco leñoso con sombra.", shortClue: "Planta leñosa" },
-            { word: "NOCHE", clue: "Periodo diario de oscuridad.", shortClue: "Oscuridad diaria" },
-            { word: "PLUMA", clue: "Estructura ligera que cubre a las aves.", shortClue: "Cobertura de ave" },
-            { word: "VERDE", clue: "Color de la hierba y la naturaleza.", shortClue: "Color natural" },
-            { word: "MONTE", clue: "Gran elevación natural del terreno.", shortClue: "Elevación de tierra" },
-            { word: "CAMPO", clue: "Terreno extenso fuera de la ciudad.", shortClue: "Terreno rural" },
-            { word: "FRUTA", clue: "Fruto comestible dulce de plantas.", shortClue: "Alimento dulce" },
-            { word: "HOTEL", clue: "Establecimiento de alojamiento turístico.", shortClue: "Alojamiento" },
-            { word: "BANDA", clue: "Grupo de músicos o cinta distintiva.", shortClue: "Grupo musical" },
-            { word: "BRUJA", clue: "Personaje místico con caldero y escoba.", shortClue: "Personaje místico" },
-            { word: "CARTA", clue: "Mensaje escrito enviado en un sobre.", shortClue: "Mensaje escrito" },
-            { word: "LLAVE", clue: "Instrumento para abrir cerrojos.", shortClue: "Abre cerraduras" }
-        ];
-
-        const words6 = [
-            { word: "MUSICA", clue: "Vibración sonora que conmueve emociones.", shortClue: "Arte sonoro" },
-            { word: "FUTURO", clue: "Tiempo que aún no ha sucedido.", shortClue: "Tiempo por venir" },
-            { word: "VOLCAN", clue: "Montaña con cráter por donde sale magma.", shortClue: "Montaña de fuego" },
-            { word: "CAMINO", clue: "Ruta o vía de tierra para transitar.", shortClue: "Ruta de paso" },
-            { word: "TESORO", clue: "Conjunto de objetos o monedas valiosas.", shortClue: "Riqueza oculta" },
-            { word: "PUERTA", clue: "Estructura que da paso a una habitación.", shortClue: "Entrada o acceso" },
-            { word: "CIUDAD", clue: "Población urbana con gran infraestructura.", shortClue: "Entorno urbano" },
-            { word: "TIEMPO", clue: "Dimensión continuada en que ocurren eventos.", shortClue: "Avance cronológico" },
-            { word: "LLUVIA", clue: "Precipitación de gotas de agua del cielo.", shortClue: "Agua del cielo" },
-            { word: "VIENTO", clue: "Corriente de aire producida en la atmósfera.", shortClue: "Aire en movimiento" },
-            { word: "SANGRE", clue: "Líquido rojo que circula por las arterias.", shortClue: "Líquido vital" },
-            { word: "PLANTA", clue: "Ser vivo fotosintético del reino vegetal.", shortClue: "Ser vegetal" },
-            { word: "SABADO", clue: "Penúltimo día de la semana.", shortClue: "Día de descanso" },
-            { word: "CUERPO", clue: "Estructura física de un ser vivo.", shortClue: "Estructura física" },
-            { word: "JARDIN", clue: "Terreno donde se cultivan flores y plantas.", shortClue: "Espacio floral" },
-            { word: "PINTOR", clue: "Artista que crea obras con colores.", shortClue: "Artista del color" },
-            { word: "MADERA", clue: "Materia sólida de los troncos de árboles.", shortClue: "Material leñoso" },
-            { word: "TEATRO", clue: "Arte escénico presentado en un escenario.", shortClue: "Arte dramático" },
-            { word: "JIRAFA", clue: "Mamífero de alto cuello y manchas.", shortClue: "Animal de cuello largo" },
-            { word: "VERANO", clue: "Estación más calurosa del año.", shortClue: "Estación cálida" },
-            { word: "ESPEJO", clue: "Superficie cristalina que refleja imágenes.", shortClue: "Reflejo cristalino" },
-            { word: "CUMBRE", clue: "Punto más alto de una montaña.", shortClue: "Cima o pico" },
-            { word: "CENTRO", clue: "Punto equidistante de los bordes.", shortClue: "Eje o núcleo" },
-            { word: "BOSQUE", clue: "Gran densidad de árboles y vegetación.", shortClue: "Densidad de árboles" },
-            { word: "OCEANO", clue: "Gran masa de agua salada del planeta.", shortClue: "Gran masa marina" }
-        ];
-
-        const words7 = [
-            { word: "PLANETA", clue: "Cuerpo celeste que orbita alrededor del Sol.", shortClue: "Cuerpo celeste" },
-            { word: "CIENCIA", clue: "Conocimiento estructurado y comprobado.", shortClue: "Estudio riguroso" },
-            { word: "GALAXIA", clue: "Enorme sistema de estrellas, polvo y gas.", shortClue: "Sistema estelar" },
-            { word: "MONTAÑA", clue: "Elevación natural del terreno de gran altura.", shortClue: "Gran elevación" },
-            { word: "DESTINO", clue: "Lugar de llegada o rumbo fatal de la vida.", shortClue: "Rumbo o meta" },
-            { word: "ENERGIA", clue: "Capacidad de realizar un trabajo o movimiento.", shortClue: "Fuerza y potencia" },
-            { word: "TRIUNFO", clue: "Victoria o éxito grande conseguido.", shortClue: "Gran victoria" },
-            { word: "LEYENDA", clue: "Relato tradicional con toque mítico.", shortClue: "Relato mítico" },
-            { word: "CORAZON", clue: "Órgano muscular que bombea la sangre.", shortClue: "Órgano vital" },
-            { word: "SECRETO", clue: "Información reservada que no se revela.", shortClue: "Dato oculto" },
-            { word: "MEMORIA", clue: "Capacidad mental para retener recuerdos.", shortClue: "Capacidad de recordar" },
-            { word: "VENTANA", clue: "Abertura en la pared para luz y ventilación.", shortClue: "Abertura con cristal" },
-            { word: "PALABRA", clue: "Unidad con significado en el lenguaje.", shortClue: "Unidad del idioma" },
-            { word: "CANCION", clue: "Composición musical hecha para ser cantada.", shortClue: "Composición cantada" },
-            { word: "GIRASOL", clue: "Flor amarilla que gira buscando la luz del sol.", shortClue: "Flor solar" },
-            { word: "RIQUEZA", clue: "Abundancia de bienes o dinero.", shortClue: "Abundancia de bienes" },
-            { word: "BATALLA", clue: "Combate entre dos fuerzas opuestas.", shortClue: "Combate bélico" },
-            { word: "BRAVURA", clue: "Valor y valentía ante el peligro.", shortClue: "Gran valentía" },
-            { word: "BARRERA", clue: "Obstáculo que impide el paso libre.", shortClue: "Obstáculo de paso" },
-            { word: "CAMELLO", clue: "Mamífero del desierto con jorobas.", shortClue: "Animal de desierto" },
-            { word: "REFUGIO", clue: "Lugar de protección ante el peligro.", shortClue: "Lugar seguro" },
-            { word: "ANTIGUO", clue: "Que existe desde hace muchísimos años.", shortClue: "De gran edad" },
-            { word: "ESPECIE", clue: "Grupo de seres vivos con características similares.", shortClue: "Grupo biológico" },
-            { word: "PINTURA", clue: "Arte de aplicar pigmentos a lienzo o pared.", shortClue: "Arte con pigmentos" },
-            { word: "MASCOTA", clue: "Animal de compañía en el hogar.", shortClue: "Compañero animal" }
-        ];
-
-        const words8 = [
-            { word: "HISTORIA", clue: "Relato de los acontecimientos pasados.", shortClue: "Relato del pasado" },
-            { word: "SILENCIO", clue: "Ausencia total de cualquier sonido.", shortClue: "Ausencia de sonido" },
-            { word: "ESTRELLA", clue: "Cuerpo celeste que emite su propia luz.", shortClue: "Brillo nocturno" },
-            { word: "ACERTIJO", clue: "Enigma planteado como juego de ingenio.", shortClue: "Enigma de ingenio" },
-            { word: "CRIATURA", clue: "Ser vivo creado o fantástico.", shortClue: "Ser fantástico" },
-            { word: "AVENTURA", clue: "Experiencia emocionante e incierta.", shortClue: "Reto emocionante" },
-            { word: "CASTILLO", clue: "Fortaleza amurallada de la época medieval.", shortClue: "Fortaleza medieval" },
-            { word: "MARIPOSA", clue: "Insecto volador de alas coloridas.", shortClue: "Insecto alado" },
-            { word: "LIBERTAD", clue: "Derecho a actuar con propia voluntad.", shortClue: "Autonomía total" },
-            { word: "BRUJERIA", clue: "Práctica de conjuros y hechizos.", shortClue: "Arte de conjuros" },
-            { word: "TORMENTA", clue: "Fenómeno con lluvias, truenos y rayos.", shortClue: "Lluvia con truenos" },
-            { word: "FANTASMA", clue: "Espectro o aparición de ultratumba.", shortClue: "Espectro o sombra" },
-            { word: "LINTERNA", clue: "Aparato portátil de luz eléctrica.", shortClue: "Luz portátil" },
-            { word: "VICTORIA", clue: "Superación del rival en una competencia.", shortClue: "Triunfo en juego" },
-            { word: "PASAJERO", clue: "Persona que viaja en un transporte.", shortClue: "Viajero en vehículo" },
-            { word: "ESTACION", clue: "Lugar de paradas de trenes o época del año.", shortClue: "Parada o época" },
-            { word: "SOMBRERO", clue: "Prenda para cubrir la cabeza.", shortClue: "Prenda de cabeza" },
-            { word: "UNIVERSO", clue: "Todo lo existente en espacio y materia.", shortClue: "Todo lo existente" },
-            { word: "MISTERIO", clue: "Hecho secreto de difícil comprensión.", shortClue: "Un enigma" },
-            { word: "ELEFANTE", clue: "Gran mamífero de trompa larga.", shortClue: "Mamífero enorme" },
-            { word: "TESORERO", clue: "Encargado de custodiar los fondos.", shortClue: "Guardián de fondos" },
-            { word: "INVIERNO", clue: "Estación más fría del año.", shortClue: "Estación fría" },
-            { word: "GUERRERO", clue: "Combatiente audaz en la batalla.", shortClue: "Luchador audaz" },
-            { word: "PIRAMIDE", clue: "Monumento antiguo de base cuadrada.", shortClue: "Monumento cónico" },
-            { word: "FARMACIA", clue: "Lugar de venta de medicamentos.", shortClue: "Boticaria o medicina" }
-        ];
-
-        const words9 = [
-            { word: "EVOLUCION", clue: "Transformación gradual de las especies.", shortClue: "Cambio gradual" },
-            { word: "SABIDURIA", clue: "Máximo grado de conocimiento e intelecto.", shortClue: "Gran conocimiento" },
-            { word: "HORIZONTE", clue: "Línea donde se unen la tierra y el cielo.", shortClue: "Línea del paisaje" },
-            { word: "ESCULTURA", clue: "Arte de esculpir figuras tridimensionales.", shortClue: "Arte en volumen" },
-            { word: "MARAVILLA", clue: "Suceso u objeto que causa admiración.", shortClue: "Algo admirable" },
-            { word: "VELOCIDAD", clue: "Rapidez en el movimiento o traslado.", shortClue: "Rapidez de marcha" },
-            { word: "GEOGRAFIA", clue: "Ciencia que describe la superficie terrestre.", shortClue: "Estudio terrestre" },
-            { word: "MITOLOGIA", clue: "Conjunto de mitos y leyendas de un pueblo.", shortClue: "Mitos ancestrales" },
-            { word: "SOMBRILLA", clue: "Utensilio para protegerse de la luz del sol.", shortClue: "Protector solar" },
-            { word: "AUTOMATAS", clue: "Máquinas que imitan movimientos humanos.", shortClue: "Máquinas autónomas" },
-            { word: "PASAPORTE", clue: "Documento oficial para viajar a otro país.", shortClue: "Documento de viaje" },
-            { word: "BIOLOGIAS", clue: "Estudios relativos a los seres vivos.", shortClue: "Estudios vivos" },
-            { word: "TELEFONIA", clue: "Sistema de comunicación por voz distante.", shortClue: "Red de voz" },
-            { word: "DIAMANTES", clue: "Gemas preciosas extremadamente duras.", shortClue: "Gemas cristalinas" },
-            { word: "NAVEGANTE", clue: "Persona que conduce una embarcación.", shortClue: "Piloto de mar" },
-            { word: "OCULTISMO", clue: "Estudio de ciencias místicas o misteriosas.", shortClue: "Ciencias místicas" },
-            { word: "ACTIVIDAD", clue: "Conjunto de tareas o acciones en desarrollo.", shortClue: "Acción en marcha" },
-            { word: "ELECTRICO", clue: "Que funciona mediante corriente eléctrica.", shortClue: "De corriente" },
-            { word: "COCODRILO", clue: "Reptil semiacuático de mandíbulas fuertes.", shortClue: "Reptil de río" },
-            { word: "SATELITES", clue: "Cuerpos u objetos que orbitan planetas.", shortClue: "Objetos en órbita" },
-            { word: "CAMPEONES", clue: "Ganadores destacados de un torneo.", shortClue: "Ganadores de torneo" },
-            { word: "ORQUIDEAS", clue: "Flores exóticas de formas variadas.", shortClue: "Flores exóticas" },
-            { word: "COLECCION", clue: "Conjunto ordenado de cosas reunidas.", shortClue: "Cosas reunidas" },
-            { word: "REFLEXION", clue: "Análisis profundo de la mente o de la luz.", shortClue: "Análisis mental" },
-            { word: "ALQUIMIAS", clue: "Doctrinas antiguas de transmutación.", shortClue: "Transmutación" }
-        ];
-
-        const words10 = [
-            { word: "NATURALEZA", clue: "Conjunto de todos los seres vivos del mundo.", shortClue: "Mundo natural" },
-            { word: "TECNOLOGIA", clue: "Herramientas e innovaciones científicas.", shortClue: "Innovación técnica" },
-            { word: "LITERATURA", clue: "Arte de las palabras en prosa o verso.", shortClue: "Arte escrito" },
-            { word: "ASTRONOMIA", clue: "Ciencia que estudia los astros del universo.", shortClue: "Estudio de astros" },
-            { word: "DIVERSIDAD", clue: "Variedad y riqueza de diferencias.", shortClue: "Variedad plural" },
-            { word: "FOTOGRAFIA", clue: "Arte de capturar imágenes con luz.", shortClue: "Captura de luz" },
-            { word: "REVOLUCION", clue: "Cambio radical y profundo en la sociedad.", shortClue: "Cambio radical" },
-            { word: "EXPLORADOR", clue: "Descubridor de nuevos territorios.", shortClue: "Rastreador de tierras" },
-            { word: "RESPLANDOR", clue: "Brillo e iluminación muy intensa.", shortClue: "Brillo radiante" },
-            { word: "ASTRONAUTA", clue: "Persona que viaja al espacio exterior.", shortClue: "Viajero espacial" },
-            { word: "DINOSAURIO", clue: "Reptil gigante extinto de la prehistoria.", shortClue: "Reptil extinto" },
-            { word: "GASTRONOMIA", clue: "Arte de preparar y disfrutar la comida.", shortClue: "Arte culinario" },
-            { word: "FANTASTICO", clue: "Que destaca por ser extraordinario.", shortClue: "Extraordinario" },
-            { word: "CAMPEONATO", clue: "Certamen deportivo para definir al ganador.", shortClue: "Torneo mayor" },
-            { word: "ESTUDIANTE", clue: "Persona dedicada al aprendizaje académico.", shortClue: "Aprendiz de aula" },
-            { word: "MATEMATICA", clue: "Ciencia lógica de los números y figuras.", shortClue: "Ciencia numérica" },
-            { word: "ALQUIMISTA", clue: "Antiguo sabio buscador de la piedra filosofal.", shortClue: "Sabio transmutador" },
-            { word: "VIDEOJUEGO", clue: "Juego electrónico en pantalla interactiva.", shortClue: "Juego interactivo" },
-            { word: "CIVILIZAR", clue: "Mejorar las costumbres y cultura social.", shortClue: "Fomentar cultura" },
-            { word: "MULTIVERSO", clue: "Hipótesis de múltiples universos paralelos.", shortClue: "Universos paralelos" },
-            { word: "VELOCIPEDO", clue: "Antiguo vehículo de dos ruedas antecedente a la bici.", shortClue: "Antecesor de bici" },
-            { word: "BIODIVERSO", clue: "Con gran variedad biológica de especies.", shortClue: "Rico en variedad" },
-            { word: "TELEVISION", clue: "Sistema de recepción de imágenes a distancia.", shortClue: "Señal de imágenes" },
-            { word: "PSICOLOGIA", clue: "Ciencia que estudia la mente y comportamiento.", shortClue: "Estudio mental" },
-            { word: "CONTINENTE", clue: "Masa gigantesca de tierra firme en el planeta.", shortClue: "Gran masa de tierra" }
-        ];
-
-        const words11 = [
-            { word: "CREATIVIDAD", clue: "Capacidad de inventar ideas originales.", shortClue: "Facultad inventiva" },
-            { word: "IMAGINACION", clue: "Facultad mental de crear escenas inéditas.", shortClue: "Creación mental" },
-            { word: "INSPIRACION", clue: "Chispa repentina que impulsa el arte.", shortClue: "Chispa artística" },
-            { word: "DICCIONARIO", clue: "Libro de consulta de significados.", shortClue: "Libro de términos" },
-            { word: "ESPECTACULO", clue: "Función o actuación pública deslumbrante.", shortClue: "Función pública" },
-            { word: "COMPUTADORA", clue: "Máquina electrónica de procesamiento de datos.", shortClue: "Equipo de datos" },
-            { word: "ESTUDIANTES", clue: "Grupo de personas en formación escolar.", shortClue: "Grupo en aulas" },
-            { word: "HELICOPTERO", clue: "Aeronave de hélices giratorias superiores.", shortClue: "Nave de hélices" },
-            { word: "COMUNIDADES", clue: "Conjuntos de personas con metas comunes.", shortClue: "Grupos afines" },
-            { word: "EXPERIENCIA", clue: "Conocimiento adquirido con el tiempo.", shortClue: "Saber por vivencias" },
-            { word: "BIOGRAFICAS", clue: "Historias escritas sobre la vida de personas.", shortClue: "Relatos de vida" },
-            { word: "INTELIGENTE", clue: "Capaz de razonar y resolver problemas.", shortClue: "Mente astuta" },
-            { word: "ARQUITECTOS", clue: "Diseñadores de estructuras y edificios.", shortClue: "Diseñadores de edificios" },
-            { word: "ELECTRONICA", clue: "Ciencia aplicada a circuitos de corriente.", shortClue: "Ciencia de circuitos" },
-            { word: "ORGANIZADOR", clue: "Persona que planifica y coordina eventos.", shortClue: "Planificador" },
-            { word: "TRANSFORMAR", clue: "Hacer cambiar de forma o estado a algo.", shortClue: "Hacer cambiar" },
-            { word: "COMUNICADOR", clue: "Persona experta en transmitir mensajes.", shortClue: "Emisor de mensajes" },
-            { word: "MARAVILLOSO", clue: "Que asombra por su excepcional belleza.", shortClue: "Asombroso y bello" },
-            { word: "CONCIENCIAS", clue: "Capacidades de percepción del bien y mal.", shortClue: "Nivel de percepción" },
-            { word: "ACTUALIZADO", clue: "Puesto al día con las últimas novedades.", shortClue: "Puesto al día" },
-            { word: "SUPERHEROES", clue: "Personajes de ficción con superpoderes.", shortClue: "Héroes legendarios" },
-            { word: "UNIVERSIDAD", clue: "Institución superior de educación y ciencia.", shortClue: "Estudio superior" },
-            { word: "ENTRETENIDO", clue: "Que distrae y resulta divertido.", shortClue: "Divertido y ameno" },
-            { word: "COMPRENSION", clue: "Capacidad de entender el sentido de las cosas.", shortClue: "Capacidad de entender" },
-            { word: "MICROSCOPIO", clue: "Instrumento óptico para ver objetos diminutos.", shortClue: "Visor diminuto" }
-        ];
-
-        const words12 = [
-            { word: "CONSTELACION", clue: "Grupo de estrellas que forman una figura.", shortClue: "Grupo de estrellas" },
-            { word: "ARCHIPIELAGO", clue: "Conjunto numeroso de islas agrupadas.", shortClue: "Conjunto de islas" },
-            { word: "OCEANOGRAFIA", clue: "Estudio científico de mares y océanos.", shortClue: "Estudio de océanos" },
-            { word: "METAMORFOSIS", clue: "Transformación completa en la forma de un ser.", shortClue: "Cambio de forma" },
-            { word: "INTELIGENCIA", clue: "Capacidad de entender, aprender y razonar.", shortClue: "Capacidad de razonar" },
-            { word: "CIVILIZACION", clue: "Conjunto de cultura y ciencia de un pueblo.", shortClue: "Cultura de un pueblo" },
-            { word: "CONFERENCIA", clue: "Reunión donde se expone un tema importante.", shortClue: "Exposición temática" },
-            { word: "ORGANIZACION", clue: "Estructura ordenada de personas o procesos.", shortClue: "Estructura ordenada" },
-            { word: "COMUNICACION", clue: "Transmisión recíproca de información.", shortClue: "Transmisión de datos" },
-            { word: "ELECTRICIDAD", clue: "Energía producida por movimiento de cargas.", shortClue: "Energía de cargas" },
-            { word: "RENACIMIENTO", clue: "Época de gran resurgimiento cultural y artístico.", shortClue: "Resurgir cultural" },
-            { word: "EXPEDICIONES", clue: "Viajes organizados con fin de exploración.", shortClue: "Viajes exploratorios" },
-            { word: "CONSERVACION", clue: "Mantenimiento cuidadoso de recursos naturales.", shortClue: "Cuidado de recursos" },
-            { word: "MANUFACTURAS", clue: "Productos elaborados industrialmente.", shortClue: "Productos elaborados" },
-            { word: "ESPECTACULAR", clue: "Que llama fuertemente la atención.", shortClue: "Llamativo e imponente" },
-            { word: "PROGRAMACION", clue: "Creación de instrucciones para computadoras.", shortClue: "Código de computación" },
-            { word: "DESARROLLADO", clue: "Que ha alcanzado un estado avanzado.", shortClue: "Estado avanzado" },
-            { word: "INVESTIGADOR", clue: "Persona dedicada a descubrir nuevos datos.", shortClue: "Buscador de datos" },
-            { word: "AUTENTICIDAD", clue: "Cualidad de ser genuino y verdadero.", shortClue: "Genuino y real" },
-            { word: "TRANSPORTADOR", clue: "Objeto o vehículo que lleva cosas de un sitio a otro.", shortClue: "Vehículo de carga" },
-            { word: "TELESCOPICOS", clue: "Relativos a la visión lejana de astros.", shortClue: "Visores lejanos" },
-            { word: "UNIVERSALIDAD", clue: "Propiedad de extenderse a todo el mundo.", shortClue: "Extensión global" },
-            { word: "DISCIPLINADOS", clue: "Personas con constancia y rigor moral.", shortClue: "Rigurosos y constantes" },
-            { word: "NATURALEZAS", clue: "Esencias y características de distintas cosas.", shortClue: "Esencias variadas" },
-            { word: "MAGNIFICENTE", clue: "Que destaca por gran lujo y esplendor.", shortClue: "Gran esplendor" }
-        ];
-
-        let selectedObj = {};
-        let secretWord = "";
-        let currentGuess = "";
-        let currentRow = 0;
-        let isGameOver = false;
-        const totalRows = 6;
-        let wordLength = 5;
-
-        const boardEl = document.getElementById("board");
-        const hintBoxEl = document.getElementById("hint-box");
-        const clueTextEl = document.getElementById("clue-text");
-        const subtitleInfoEl = document.getElementById("subtitle-info");
-        const messageEl = document.getElementById("game-message");
-        const restartBtn = document.getElementById("restart-btn");
-
-        function initGame() {
-            const rand = Math.random();
-            let categoryPool = [];
-
-            if (rand < 0.65) {
-                // 65% probabilidad: Muy probable (3 a 5 letras)
-                const subRand = Math.random();
-                if (subRand < 0.333) categoryPool = words3;
-                else if (subRand < 0.666) categoryPool = words4;
-                else categoryPool = words5;
-            } else if (rand < 0.90) {
-                // 25% probabilidad: Medio probable (6 a 8 letras)
-                const subRand = Math.random();
-                if (subRand < 0.333) categoryPool = words6;
-                else if (subRand < 0.666) categoryPool = words7;
-                else categoryPool = words8;
-            } else {
-                // 10% probabilidad: Poco probable (9 a 12 letras)
-                const subRand = Math.random();
-                if (subRand < 0.25) categoryPool = words9;
-                else if (subRand < 0.50) categoryPool = words10;
-                else if (subRand < 0.75) categoryPool = words11;
-                else categoryPool = words12;
-            }
-
-            selectedObj = categoryPool[Math.floor(Math.random() * categoryPool.length)];
-
-            secretWord = selectedObj.word.toUpperCase();
-            wordLength = secretWord.length;
-            
-            hintBoxEl.classList.add("opacity-0", "scale-95", "pointer-events-none");
-            hintBoxEl.classList.remove("opacity-100", "scale-100", "pointer-events-auto");
-            clueTextEl.textContent = "...";
-
-            const isExtraLong = wordLength >= 9;
-            subtitleInfoEl.textContent = `Palabra de ${wordLength} letras • 6 intentos ${isExtraLong ? '🔥 ¡Desafío Especial!' : ''}`;
-            
-            currentGuess = "";
-            currentRow = 0;
-            isGameOver = false;
-            
-            messageEl.style.opacity = "0";
-            restartBtn.classList.add("hidden");
-
-            // Resetear colores de teclas
-            document.querySelectorAll(".key-btn").forEach(btn => {
-                if (btn.dataset.key !== "ENTER" && btn.dataset.key !== "BACK") {
-                    btn.className = "key-btn flex-1 bg-white/20 hover:bg-white/30 active:scale-90 transition-all font-bold py-3 rounded-lg text-xs md:text-sm shadow-md";
-                }
-            });
-
-            buildBoard();
-        }
-
-        function buildBoard() {
-            boardEl.innerHTML = "";
-
-            if (wordLength > 8) {
-                boardEl.style.maxWidth = "100%";
-            } else {
-                boardEl.style.maxWidth = "320px";
-            }
-
-            let fontSizeClass = "text-lg md:text-xl font-bold";
-            let borderWidthClass = "border-2";
-            
-            if (wordLength >= 10) {
-                fontSizeClass = "text-xs md:text-sm font-extrabold";
-                borderWidthClass = "border";
-            } else if (wordLength >= 8) {
-                fontSizeClass = "text-sm md:text-base font-bold";
-            }
-
-            for (let r = 0; r < totalRows; r++) {
-                const rowDiv = document.createElement("div");
-                rowDiv.className = "grid gap-1 w-full";
-                rowDiv.style.gridTemplateColumns = `repeat(${wordLength}, minmax(0, 1fr))`;
-                rowDiv.id = `row-${r}`;
-
-                for (let c = 0; c < wordLength; c++) {
-                    const cell = document.createElement("div");
-                    cell.className = `aspect-square ${borderWidthClass} border-white/20 rounded-lg flex items-center justify-center ${fontSizeClass} uppercase transition-all duration-300 bg-white/5`;
-                    cell.id = `cell-${r}-${c}`;
-                    rowDiv.appendChild(cell);
-                }
-                boardEl.appendChild(rowDiv);
-            }
-        }
-
-        function handleKeyPress(key) {
-            if (isGameOver) return;
-
-            if (key === "ENTER") {
-                submitGuess();
-            } else if (key === "BACK" || key === "BACKSPACE") {
-                if (currentGuess.length > 0) {
-                    currentGuess = currentGuess.slice(0, -1);
-                    updateCurrentRowUI();
-                }
-            } else if (/^[A-ZÑ]$/.test(key)) {
-                if (currentGuess.length < wordLength) {
-                    currentGuess += key;
-                    updateCurrentRowUI();
-                }
-            }
-        }
-
-        function updateCurrentRowUI() {
-            for (let c = 0; c < wordLength; c++) {
-                const cell = document.getElementById(`cell-${currentRow}-${c}`);
-                if (c < currentGuess.length) {
-                    cell.textContent = currentGuess[c];
-                    cell.className = cell.className.replace(/bg-white\/5|border-white\/20/g, "");
-                    cell.classList.add("bg-indigo-600/40", "border-indigo-400", "text-white", "pop-animation");
-                } else {
-                    cell.textContent = "";
-                    cell.classList.remove("bg-indigo-600/40", "border-indigo-400", "pop-animation");
-                    cell.classList.add("bg-white/5", "border-white/20");
-                }
-            }
-        }
-
-        function showMessage(msg) {
-            messageEl.textContent = msg;
-            messageEl.style.opacity = "1";
+        // Ocultar pantalla de carga después de la animación
+        window.addEventListener('load', () => {
+            const splashScreen = document.getElementById('splash-screen');
+            // Esperamos 2 segundos para mostrar la animación inicial
             setTimeout(() => {
-                messageEl.style.opacity = "0";
-            }, 2500);
-        }
-
-        function submitGuess() {
-            if (currentGuess.length < wordLength) {
-                showMessage(`Faltan letras (${currentGuess.length}/${wordLength})`);
-                const rowEl = document.getElementById(`row-${currentRow}`);
-                rowEl.classList.add("shake-animation");
-                setTimeout(() => rowEl.classList.remove("shake-animation"), 400);
-                return;
-            }
-
-            // Wordle letter evaluation with exact counts
-            const targetArray = secretWord.split('');
-            const guessArray = currentGuess.split('');
-            const evaluation = new Array(wordLength).fill('absent');
-
-            // Conteo de frecuencia disponible
-            const letterCounts = {};
-            for (const char of targetArray) {
-                letterCounts[char] = (letterCounts[char] || 0) + 1;
-            }
-
-            // Pase 1: Verdes (Correctas)
-            for (let i = 0; i < wordLength; i++) {
-                if (guessArray[i] === targetArray[i]) {
-                    evaluation[i] = 'correct';
-                    letterCounts[guessArray[i]]--;
-                }
-            }
-
-            // Pase 2: Amarillos (Posición diferente) o Grises (Excedentes)
-            for (let i = 0; i < wordLength; i++) {
-                if (evaluation[i] !== 'correct') {
-                    const char = guessArray[i];
-                    if (letterCounts[char] && letterCounts[char] > 0) {
-                        evaluation[i] = 'present';
-                        letterCounts[char]--;
-                    }
-                }
-            }
-
-            // Animar revelación de celdas
-            for (let i = 0; i < wordLength; i++) {
-                const cell = document.getElementById(`cell-${currentRow}-${i}`);
-                const keyBtn = document.querySelector(`.key-btn[data-key="${guessArray[i]}"]`);
+                splashScreen.classList.add('opacity-0', 'scale-110');
+                splashScreen.style.pointerEvents = 'none';
                 
+                // Remover el elemento del DOM una vez termine la transición (700ms)
                 setTimeout(() => {
-                    cell.classList.add("flip-tile");
-                    
-                    // Fondo completo según resultado
-                    cell.classList.remove("bg-white/5", "bg-indigo-600/40", "border-indigo-400", "border-white/20");
-                    if (evaluation[i] === 'correct') {
-                        cell.classList.add("bg-emerald-600", "border-emerald-500", "text-white");
-                        if (keyBtn) keyBtn.className = "key-btn flex-1 bg-emerald-600 text-white font-bold py-3 rounded-lg text-xs md:text-sm shadow-md";
-                    } else if (evaluation[i] === 'present') {
-                        cell.classList.add("bg-amber-500", "border-amber-400", "text-white");
-                        if (keyBtn && !keyBtn.classList.contains("bg-emerald-600")) {
-                            keyBtn.className = "key-btn flex-1 bg-amber-500 text-white font-bold py-3 rounded-lg text-xs md:text-sm shadow-md";
-                        }
-                    } else {
-                        cell.classList.add("bg-slate-700/80", "border-slate-600", "text-slate-300");
-                        if (keyBtn && !keyBtn.classList.contains("bg-emerald-600") && !keyBtn.classList.contains("bg-amber-500")) {
-                            keyBtn.className = "key-btn flex-1 bg-slate-800 text-slate-400 font-bold py-3 rounded-lg text-xs md:text-sm shadow-md opacity-60";
-                        }
-                    }
-                }, i * 200);
-            }
+                    splashScreen.remove();
+                }, 700);
+            }, 2000);
+        });
 
-            // Verificar victoria / derrota después de animaciones
-            const revealDelay = wordLength * 200 + 100;
+        // Show help on first visit
+        if (userStats.played === 0 && !localStorage.getItem('palabra_secreta_help_seen')) {
             setTimeout(() => {
-                if (currentGuess === secretWord) {
-                    isGameOver = true;
-                    showMessage("🎉 ¡Felicidades! Acertaste la palabra.");
-                    restartBtn.classList.remove("hidden");
-                    recordGameResult(true);
-                } else {
-                    currentRow++;
-                    currentGuess = "";
-
-                    // Revelar pista muy corta en el penúltimo intento (intento 5, índice 4)
-                    if (currentRow === 4 && selectedObj) {
-                        const shortClue = selectedObj.shortClue || (selectedObj.clue ? selectedObj.clue.split(' ')[0] + '...' : '');
-                        clueTextEl.innerHTML = `<span class="bg-yellow-400/20 text-yellow-300 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded mr-1">Pista corta:</span>${shortClue}`;
-                        hintBoxEl.classList.remove("opacity-0", "scale-95", "pointer-events-none");
-                        hintBoxEl.classList.add("opacity-100", "scale-100", "pointer-events-auto");
-                    }
-                    // Revelar pista completa en el último intento (intento 6, índice 5)
-                    else if (currentRow === 5 && selectedObj) {
-                        clueTextEl.innerHTML = `<span class="bg-amber-400/30 text-amber-200 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded mr-1">Pista completa:</span>${selectedObj.clue}`;
-                        hintBoxEl.classList.remove("opacity-0", "scale-95", "pointer-events-none");
-                        hintBoxEl.classList.add("opacity-100", "scale-100", "pointer-events-auto");
-                    }
-
-                    if (currentRow >= totalRows) {
-                        isGameOver = true;
-                        showMessage(`❌ La palabra era: ${secretWord}`);
-                        restartBtn.classList.remove("hidden");
-                        recordGameResult(false);
-                    }
-                }
-            }, revealDelay);
+                openHelp();
+                localStorage.setItem('palabra_secreta_help_seen', 'true');
+            }, 3000); // Retrasamos un poco el modal para que no se pise con la pantalla de carga
         }
 
-        document.querySelectorAll(".key-btn").forEach(btn => {
-            btn.addEventListener("click", () => handleKeyPress(btn.dataset.key));
-        });
-
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                handleKeyPress("ENTER");
-            } else if (e.key === "Backspace") {
-                handleKeyPress("BACK");
-            } else {
-                handleKeyPress(e.key.toUpperCase());
-            }
-        });
-
-        restartBtn.addEventListener("click", () => {
-            initGame();
-        });
-
-        function updateTotalWordsCounter() {
-            const total = words3.length + words4.length + words5.length + words6.length + 
-                          words7.length + words8.length + words9.length + words10.length + 
-                          words11.length + words12.length;
-            const counterEl = document.getElementById("total-words-count");
-            if (counterEl) {
-                counterEl.textContent = total;
-            }
-        }
-
-        window.onload = () => {
-            initAuth();
-            updateTotalWordsCounter();
-            initGame();
-        };
     </script>
 </body>
 </html>
