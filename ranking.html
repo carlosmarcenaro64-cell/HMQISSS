@@ -3,251 +3,733 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Ranking Global - Palabra Secreta</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- HEADER -->
     <header class="p-4 sm:p-6 flex items-center justify-between max-w-5xl mx-auto w-full">
-        <a href="index.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition text-slate-300 text-sm font-medium">
+
+        <a href="./index.html"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition text-slate-300 text-sm font-medium">
             ← Volver
         </a>
-        <div class="flex items-center gap-3">
-            <span class="text-xs uppercase tracking-widest text-indigo-400 font-semibold hidden sm:inline">Palabra Secreta</span>
-            <button id="btn-secret-diagnostic" class="text-xs text-slate-600 hover:text-slate-400 transition p-2 rounded-lg bg-slate-900/50 border border-slate-800/50" title="Herramienta de diagnóstico">
-                🛠️
-            </button>
-        </div>
+
+        <span class="text-xs uppercase tracking-widest text-indigo-400 font-semibold">
+            Palabra Secreta
+        </span>
+
     </header>
 
+
+    <!-- CONTENIDO -->
     <main class="flex-grow px-4 py-6 max-w-4xl mx-auto w-full flex flex-col items-center">
-        
+
+        <!-- TITULO -->
         <div class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 bg-clip-text text-transparent flex items-center justify-center gap-3">
+
+            <h1 class="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 bg-clip-text text-transparent">
+
                 🏆 RANKING GLOBAL
+
             </h1>
-            <p class="text-slate-400 text-sm mt-2">Tabla de Líderes y Estadísticas de Jugadores</p>
+
+            <p class="text-slate-400 text-sm mt-2">
+                Los mejores jugadores de Palabra Secreta
+            </p>
+
         </div>
 
-        <!-- Diagnostic Box (Hidden by default) -->
-        <div id="diagnostic-box" class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-5 mb-8 shadow-xl hidden">
-            <div class="flex items-center justify-between mb-2">
-                <h2 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
-                    🛠️ Panel de Diagnóstico Firestore (Protegido)
-                </h2>
-                <button id="close-diagnostic" class="text-slate-400 hover:text-slate-200 text-xs px-2 py-1 bg-slate-800 rounded">Cerrar ✕</button>
-            </div>
-            <div id="diagnostic-content" class="text-xs font-mono text-slate-300 whitespace-pre-line bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 max-h-60 overflow-y-auto">
-                Iniciando análisis...
-            </div>
-        </div>
 
-        <!-- Leaderboard Table Container -->
-        <div class="w-full bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md">
+        <!-- TABLA -->
+        <div class="w-full bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-2xl overflow-hidden">
+
             <div class="overflow-x-auto">
+
                 <table class="w-full text-left border-collapse">
+
                     <thead>
-                        <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-900/90">
-                            <th class="py-3 px-4 sm:px-6">Pos</th>
-                            <th class="py-3 px-4 sm:px-6">Jugador</th>
-                            <th class="py-3 px-4 sm:px-6 text-center">Victorias</th>
-                            <th class="py-3 px-4 sm:px-6 text-center">Partidas</th>
-                            <th class="py-3 px-4 sm:px-6 text-right">Efectividad</th>
+
+                        <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-900">
+
+                            <th class="py-3 px-4 sm:px-6">
+                                Pos
+                            </th>
+
+                            <th class="py-3 px-4 sm:px-6">
+                                Jugador
+                            </th>
+
+                            <th class="py-3 px-4 sm:px-6 text-center">
+                                Victorias
+                            </th>
+
+                            <th class="py-3 px-4 sm:px-6 text-center">
+                                Partidas
+                            </th>
+
+                            <th class="py-3 px-4 sm:px-6 text-right">
+                                Efectividad
+                            </th>
+
                         </tr>
+
                     </thead>
-                    <tbody id="leaderboard-body" class="divide-y divide-slate-800/50 text-sm">
+
+
+                    <tbody id="leaderboard-body"
+                           class="divide-y divide-slate-800/50 text-sm">
+
                         <tr>
-                            <td colspan="5" class="py-8 text-center text-slate-500">Cargando jugadores...</td>
+
+                            <td colspan="5"
+                                class="py-8 text-center text-slate-500">
+
+                                Cargando jugadores...
+
+                            </td>
+
                         </tr>
+
                     </tbody>
+
                 </table>
+
             </div>
+
+        </div>
+
+
+        <!-- MENSAJE VACIO -->
+        <div id="empty-message"
+             class="hidden mt-6 text-center bg-slate-900 border border-slate-800 rounded-2xl p-8 w-full">
+
+            <div class="text-5xl mb-3">
+                🎮
+            </div>
+
+            <h2 class="text-xl font-bold">
+                Aún no hay jugadores
+            </h2>
+
+            <p class="text-slate-400 text-sm mt-2">
+                ¡Sé el primero en entrar al ranking!
+            </p>
+
+        </div>
+
+
+        <!-- ERROR -->
+        <div id="error-message"
+             class="hidden mt-6 text-center bg-red-950/30 border border-red-900 rounded-2xl p-6 w-full">
+
+            <div class="text-3xl mb-2">
+                ⚠️
+            </div>
+
+            <p class="text-red-300 font-bold">
+                No se pudo cargar el ranking
+            </p>
+
+            <p id="error-text"
+               class="text-red-400 text-xs mt-2">
+            </p>
+
         </div>
 
     </main>
 
+
+    <!-- FOOTER -->
     <footer class="py-6 text-center text-xs text-slate-600">
-        By: Marcenaroc64
+
+        By:
+        <span class="font-bold text-indigo-400">
+            Marcenaroc64
+        </span>
+
     </footer>
 
-    <!-- PIN Modal -->
-    <div id="pin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center">
-            <h3 class="text-base font-semibold text-slate-200 mb-2">Acceso Restringido</h3>
-            <p class="text-xs text-slate-400 mb-4">Ingresa el código de acceso para ver el panel de diagnóstico.</p>
-            <input type="password" id="pin-input" placeholder="Código PIN" maxlength="6" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-center text-lg tracking-widest text-slate-100 mb-4 focus:outline-none focus:border-indigo-500" />
-            <div class="flex gap-2">
-                <button id="cancel-pin" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium py-2.5 rounded-xl transition">Cancelar</button>
-                <button id="submit-pin" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 rounded-xl transition">Verificar</button>
-            </div>
-        </div>
-    </div>
+
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collectionGroup, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'palabra-secreta';
-        
-        // Use real production configuration if deployed on GitHub Pages or custom domain, with fallback
-        const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config) ? JSON.parse(__firebase_config) : {
-            apiKey: "TU_API_KEY_REAL_DE_FIREBASE",
-            authDomain: "palabra-secre.firebaseapp.com",
-            projectId: "palabra-secre"
+        /* =========================================
+           FIREBASE
+           ========================================= */
+
+        import {
+            initializeApp
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            doc,
+            getDoc
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
+        /* =========================================
+           CONFIGURACION REAL DE FIREBASE
+           ========================================= */
+
+        const firebaseConfig = {
+
+            apiKey:
+                "AIzaSyC7hjuWiRx3uBdfKAS3mj9na6zqO6xtQUY",
+
+            authDomain:
+                "palabra-secre.firebaseapp.com",
+
+            projectId:
+                "palabra-secre",
+
+            storageBucket:
+                "palabra-secre.firebasestorage.app",
+
+            messagingSenderId:
+                "1057501011597",
+
+            appId:
+                "1:1057501011597:web:ab2dd815a8ad9a293cccc4"
+
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
 
-        // UI Elements for PIN & Diagnostic
-        const btnSecret = document.getElementById('btn-secret-diagnostic');
-        const pinModal = document.getElementById('pin-modal');
-        const pinInput = document.getElementById('pin-input');
-        const submitPin = document.getElementById('submit-pin');
-        const cancelPin = document.getElementById('cancel-pin');
-        const diagnosticBox = document.getElementById('diagnostic-box');
-        const closeDiagnostic = document.getElementById('close-diagnostic');
+        /* =========================================
+           APP
+           ========================================= */
 
-        btnSecret.addEventListener('click', () => {
-            pinModal.classList.remove('hidden');
-            pinInput.value = '';
-            pinInput.focus();
-        });
+        const app =
+            initializeApp(firebaseConfig);
 
-        cancelPin.addEventListener('click', () => {
-            pinModal.classList.add('hidden');
-        });
 
-        closeDiagnostic.addEventListener('click', () => {
-            diagnosticBox.classList.add('hidden');
-        });
+        const db =
+            getFirestore(app);
 
-        submitPin.addEventListener('click', verifyPin);
-        pinInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') verifyPin();
-        });
 
-        function verifyPin() {
-            if (pinInput.value.trim() === '140703') {
-                pinModal.classList.add('hidden');
-                diagnosticBox.classList.remove('hidden');
-            } else {
-                pinInput.classList.add('border-red-500');
-                setTimeout(() => pinInput.classList.remove('border-red-500'), 1000);
-            }
-        }
+        const appId =
+            "palabra-secreta";
 
-        async function initApp() {
-            const diagnosticContent = document.getElementById('diagnostic-content');
-            const tbody = document.getElementById('leaderboard-body');
+
+        /* =========================================
+           ELEMENTOS
+           ========================================= */
+
+        const tbody =
+            document.getElementById(
+                "leaderboard-body"
+            );
+
+
+        const emptyMessage =
+            document.getElementById(
+                "empty-message"
+            );
+
+
+        const errorMessage =
+            document.getElementById(
+                "error-message"
+            );
+
+
+        const errorText =
+            document.getElementById(
+                "error-text"
+            );
+
+
+        /* =========================================
+           CARGAR RANKING
+           ========================================= */
+
+        async function loadRanking() {
 
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
 
-                let diagnosticLog = "";
-                let playersMap = new Map();
+                /*
+                =========================================
+                OBTENER TODOS LOS USUARIOS
+                =========================================
 
-                // Intento 1: Colección Group 'stats'
-                try {
-                    diagnosticLog += `• Buscando con collectionGroup('stats')...\n`;
-                    const statsSnapshot = await getDocs(collectionGroup(db, "stats"));
-                    diagnosticLog += `  → Documentos encontrados: ${statsSnapshot.size}\n`;
+                Ruta:
 
-                    statsSnapshot.forEach((docSnap) => {
-                        const data = docSnap.data();
-                        let playerName = data.displayName || data.name || data.username || "Jugador Anónimo";
-                        let won = Number(data.won || data.wins || data.ganadas || 0);
-                        let played = Number(data.played || data.gamesPlayed || data.jugadas || 0);
-                        let userId = data.userId || data.uid || docSnap.id;
+                artifacts
+                    palabra-secreta
+                        users
+                            ID_USUARIO
 
-                        if (played > 0 || won > 0) {
-                            playersMap.set(userId, { name: playerName, won, played });
-                        }
-                    });
-                } catch (e1) {
-                    diagnosticLog += `  ⚠️ collectionGroup error: ${e1.message}\n`;
-                }
+                */
 
-                // Intento 2: Ruta directa artifacts/{appId}/users
-                try {
-                    diagnosticLog += `• Buscando en ruta directa: artifacts/${appId}/users...\n`;
-                    const usersCol = collection(db, 'artifacts', appId, 'users');
-                    const usersSnapshot = await getDocs(usersCol);
-                    diagnosticLog += `  → Usuarios raíz encontrados: ${usersSnapshot.size}\n`;
+                const usersRef =
+                    collection(
+                        db,
+                        "artifacts",
+                        appId,
+                        "users"
+                    );
 
-                    for (const userDoc of usersSnapshot.docs) {
-                        const userId = userDoc.id;
-                        const userStatsCol = collection(db, 'artifacts', appId, 'users', userId, 'stats');
-                        const userStatsSnap = await getDocs(userStatsCol);
-                        
-                        userStatsSnap.forEach(statDoc => {
-                            const data = statDoc.data();
-                            let playerName = data.displayName || data.name || data.username || `Usuario ${userId.substring(0,6)}`;
-                            let won = Number(data.won || data.wins || data.ganadas || 0);
-                            let played = Number(data.played || data.gamesPlayed || data.jugadas || 0);
 
-                            if (played > 0 || won > 0) {
-                                playersMap.set(userId, { name: playerName, won, played });
-                            }
-                        });
+                const usersSnapshot =
+                    await getDocs(
+                        usersRef
+                    );
+
+
+                const players =
+                    [];
+
+
+                /*
+                =========================================
+                RECORRER USUARIOS
+                =========================================
+                */
+
+                for (
+                    const userDoc
+                    of usersSnapshot.docs
+                ) {
+
+                    const userId =
+                        userDoc.id;
+
+
+                    /*
+                    =========================================
+                    ESTADISTICAS
+
+                    artifacts/appId/users/userId/
+                    gameData/stats
+                    =========================================
+                    */
+
+                    const statsRef =
+                        doc(
+                            db,
+                            "artifacts",
+                            appId,
+                            "users",
+                            userId,
+                            "gameData",
+                            "stats"
+                        );
+
+
+                    const statsSnap =
+                        await getDoc(
+                            statsRef
+                        );
+
+
+                    /*
+                    Si no hay estadísticas
+                    */
+
+                    if (
+                        !statsSnap.exists()
+                    ) {
+
+                        continue;
+
                     }
-                } catch (e2) {
-                    diagnosticLog += `  ⚠️ Búsqueda directa error: ${e2.message}\n`;
+
+
+                    const data =
+                        statsSnap.data();
+
+
+                    /*
+                    =========================================
+                    DATOS
+                    =========================================
+                    */
+
+                    const won =
+                        Number(
+                            data.won || 0
+                        );
+
+
+                    const played =
+                        Number(
+                            data.played || 0
+                        );
+
+
+                    /*
+                    Si nunca jugó, no aparece
+                    */
+
+                    if (
+                        played <= 0
+                    ) {
+
+                        continue;
+
+                    }
+
+
+                    /*
+                    =========================================
+                    NOMBRE
+
+                    El documento principal del usuario
+                    podría contener información.
+
+                    Si no existe, mostramos una versión
+                    corta del ID.
+                    =========================================
+                    */
+
+                    const userData =
+                        userDoc.data();
+
+
+                    const name =
+
+                        userData.displayName ||
+
+                        userData.name ||
+
+                        data.displayName ||
+
+                        data.name ||
+
+                        "Jugador " +
+                        userId.substring(
+                            0,
+                            6
+                        );
+
+
+                    /*
+                    =========================================
+                    EFECTIVIDAD
+                    =========================================
+                    */
+
+                    const winRate =
+
+                        played > 0
+
+                        ?
+
+                        (
+                            won /
+                            played
+                        ) * 100
+
+                        :
+
+                        0;
+
+
+                    players.push({
+
+                        id:
+                            userId,
+
+                        name:
+                            name,
+
+                        won:
+                            won,
+
+                        played:
+                            played,
+
+                        winRate:
+                            winRate
+
+                    });
+
                 }
 
-                const players = Array.from(playersMap.values());
-                players.sort((a, b) => b.won - a.won || b.played - a.played);
 
-                diagnosticLog += `• Total jugadores válidos en ranking: ${players.length}`;
-                diagnosticContent.textContent = diagnosticLog;
+                /*
+                =========================================
+                ORDENAR
 
-                if (players.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">Aún no hay partidas registradas en la base de datos. ¡Juega una partida para aparecer aquí!</td></tr>`;
+                Primero:
+                Mayor porcentaje
+
+                Después:
+                Más victorias
+                =========================================
+                */
+
+                players.sort(
+
+                    (
+                        a,
+                        b
+                    ) =>
+
+                        b.winRate -
+                        a.winRate
+
+                        ||
+
+                        b.won -
+                        a.won
+
+                );
+
+
+                /*
+                =========================================
+                SI NO HAY JUGADORES
+                =========================================
+                */
+
+                if (
+
+                    players.length === 0
+
+                ) {
+
+                    tbody.innerHTML =
+                        "";
+
+                    emptyMessage.classList.remove(
+                        "hidden"
+                    );
+
+
                     return;
+
                 }
 
-                tbody.innerHTML = '';
-                players.forEach((player, index) => {
-                    const winrate = player.played > 0 ? ((player.won / player.played) * 100).toFixed(1) : '0.0';
-                    let medalBadge = `<span class="font-mono text-slate-400 font-bold">#${index + 1}</span>`;
-                    if (index === 0) medalBadge = `<span class="text-xl">🥇</span>`;
-                    if (index === 1) medalBadge = `<span class="text-xl">🥈</span>`;
-                    if (index === 2) medalBadge = `<span class="text-xl">🥉</span>`;
 
-                    const row = document.createElement('tr');
-                    row.className = "hover:bg-slate-900/80 transition-colors";
-                    row.innerHTML = `
-                        <td class="py-4 px-4 sm:px-6 font-medium">${medalBadge}</td>
-                        <td class="py-4 px-4 sm:px-6 font-semibold text-slate-200">${escapeHtml(player.name)}</td>
-                        <td class="py-4 px-4 sm:px-6 text-center text-emerald-400 font-bold">${player.won}</td>
-                        <td class="py-4 px-4 sm:px-6 text-center text-slate-300">${player.played}</td>
-                        <td class="py-4 px-4 sm:px-6 text-right font-mono text-indigo-400">${winrate}%</td>
-                    `;
-                    tbody.appendChild(row);
-                });
+                /*
+                =========================================
+                LIMPIAR TABLA
+                =========================================
+                */
 
-            } catch (err) {
-                console.error(err);
-                diagnosticContent.textContent = `❌ Error general de conexión: ${err.message}`;
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-red-400 text-center px-4">Error al conectar con Firebase (Posible API Key incorrecta o bloqueada en GitHub Pages).</td></tr>`;
+                tbody.innerHTML =
+                    "";
+
+
+                /*
+                =========================================
+                MOSTRAR JUGADORES
+                =========================================
+                */
+
+                players.forEach(
+
+                    (
+                        player,
+                        index
+                    ) => {
+
+
+                        const position =
+                            index + 1;
+
+
+                        /*
+                        =========================================
+                        MEDALLAS
+                        =========================================
+                        */
+
+                        let medal =
+
+                            "#" +
+                            position;
+
+
+                        if (
+                            position === 1
+                        ) {
+
+                            medal =
+                                "🥇";
+
+                        }
+
+
+                        if (
+                            position === 2
+                        ) {
+
+                            medal =
+                                "🥈";
+
+                        }
+
+
+                        if (
+                            position === 3
+                        ) {
+
+                            medal =
+                                "🥉";
+
+                        }
+
+
+                        /*
+                        =========================================
+                        FILA
+                        =========================================
+                        */
+
+                        const row =
+                            document.createElement(
+                                "tr"
+                            );
+
+
+                        row.className =
+                            "hover:bg-slate-900 transition-colors";
+
+
+                        row.innerHTML = `
+
+                            <td class="py-4 px-4 sm:px-6 font-bold">
+
+                                ${medal}
+
+                            </td>
+
+
+                            <td class="py-4 px-4 sm:px-6 font-semibold text-slate-200">
+
+                                ${escapeHtml(
+                                    String(
+                                        player.name
+                                    )
+                                )}
+
+                            </td>
+
+
+                            <td class="py-4 px-4 sm:px-6 text-center text-emerald-400 font-bold">
+
+                                ${player.won}
+
+                            </td>
+
+
+                            <td class="py-4 px-4 sm:px-6 text-center text-slate-300">
+
+                                ${player.played}
+
+                            </td>
+
+
+                            <td class="py-4 px-4 sm:px-6 text-right font-mono text-indigo-400">
+
+                                ${player.winRate.toFixed(
+                                    1
+                                )}%
+
+                            </td>
+
+                        `;
+
+
+                        tbody.appendChild(
+                            row
+                        );
+
+
+                    }
+
+                );
+
+
             }
+
+
+            catch (
+                error
+            ) {
+
+
+                console.error(
+                    error
+                );
+
+
+                tbody.innerHTML =
+                    "";
+
+
+                errorMessage.classList.remove(
+                    "hidden"
+                );
+
+
+                errorText.textContent =
+                    error.message;
+
+
+            }
+
         }
 
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        /*
+        =========================================
+        SEGURIDAD HTML
+        =========================================
+        */
+
+        function escapeHtml(
+            text
+        ) {
+
+            return text
+
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+
+                .replace(
+                    />/g,
+                    "&gt;"
+                );
+
         }
 
-        window.addEventListener('DOMContentLoaded', initApp);
+
+        /*
+        =========================================
+        INICIAR
+        =========================================
+        */
+
+        loadRanking();
+
+
     </script>
+
 </body>
 </html>
