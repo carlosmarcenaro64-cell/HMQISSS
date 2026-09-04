@@ -43,6 +43,26 @@
             50% { box-shadow: 0 0 25px rgba(234, 179, 8, 0.6); }
         }
         
+        /* Animación para el hito de fuego (cada 5 rachas) */
+        .fire-milestone-popup {
+            animation: firePop 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes firePop {
+            0% { transform: scale(0.3) translateY(40px); opacity: 0; }
+            20% { transform: scale(1.15) translateY(0); opacity: 1; }
+            35% { transform: scale(1) translateY(0); opacity: 1; }
+            80% { transform: scale(1) translateY(-20px); opacity: 1; }
+            100% { transform: scale(0.9) translateY(-60px); opacity: 0; }
+        }
+
+        .flame-wiggle {
+            animation: flameWiggle 0.6s ease-in-out infinite alternate;
+        }
+        @keyframes flameWiggle {
+            0% { transform: rotate(-5deg) scale(1); }
+            100% { transform: rotate(5deg) scale(1.08); }
+        }
+        
         /* Utility classes for tile colors to simplify JS */
         .tile-correct { background-color: #059669; border-color: #059669; color: white; }
         .tile-present { background-color: #d97706; border-color: #d97706; color: white; }
@@ -75,6 +95,19 @@
                 <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
                 <div class="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" style="animation-delay: 0.4s;"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Contenedor flotante para animación de racha de fuego (cada 5 niveles) -->
+    <div id="fire-milestone-container" class="fixed inset-0 z-[200] pointer-events-none flex items-center justify-center overflow-hidden hidden">
+        <div id="fire-milestone-box" class="bg-slate-900/90 backdrop-blur-md border-2 border-amber-500/80 px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center justify-center text-center transform scale-50 opacity-0">
+            <div class="text-6xl md:text-7xl mb-2 flame-wiggle">🔥</div>
+            <h3 class="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-300 uppercase tracking-wider">
+                ¡Racha Legendaria!
+            </h3>
+            <p class="text-sm md:text-base font-bold text-amber-200 mt-1">
+                ¡Has alcanzado <span id="milestone-streak-num" class="text-white text-lg underline">5</span> victorias seguidas!
+            </p>
         </div>
     </div>
 
@@ -397,15 +430,22 @@
             By: <span class="text-pink-400">Marcenaroc64</span>
         </span>
 
-        <a href="https://www.tiktok.com/@marcenaroc64" 
-           target="_blank" 
-           rel="noopener noreferrer" 
-           class="flex items-center gap-1.5 bg-black/60 hover:bg-black/90 active:scale-95 border border-white/20 text-white px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all shadow-md hover:border-pink-500/50">
-            <svg class="w-3.5 h-3.5 fill-current text-cyan-400" viewBox="0 0 24 24">
-                <path d="M12.525 0h3.08c.12 1.052.752 1.988 1.7 2.493a4.757 4.757 0 002.595.6v3.169a8.03 8.03 0 01-3.692-.903c-.235-.126-.454-.27-.658-.432v8.92c0 3.823-3.105 6.928-6.928 6.928-3.823 0-6.928-3.105-6.928-6.928 0-3.823 3.105-6.928 6.928-6.928.324 0 .643.023.956.068v3.2a3.732 3.732 0 00-.956-.123c-2.062 0-3.732 1.67-3.732 3.732 0 2.062 1.67 3.732 3.732 3.732 2.062 0 3.732-1.67 3.732-3.732V0z"/>
-            </svg>
-            <span class="text-white">TikTok</span>
-        </a>
+        <div class="flex items-center gap-2">
+            <!-- Indicador de Racha en el Footer -->
+            <div id="footer-streak" class="flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 text-amber-300 px-2.5 py-1 rounded-full text-[10px] font-bold shadow-sm">
+                🔥 <span id="footer-streak-val">0</span>
+            </div>
+
+            <a href="https://www.tiktok.com/@marcenaroc64" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               class="flex items-center gap-1.5 bg-black/60 hover:bg-black/90 active:scale-95 border border-white/20 text-white px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all shadow-md hover:border-pink-500/50">
+                <svg class="w-3.5 h-3.5 fill-current text-cyan-400" viewBox="0 0 24 24">
+                    <path d="M12.525 0h3.08c.12 1.052.752 1.988 1.7 2.493a4.757 4.757 0 002.595.6v3.169a8.03 8.03 0 01-3.692-.903c-.235-.126-.454-.27-.658-.432v8.92c0 3.823-3.105 6.928-6.928 6.928-3.823 0-6.928-3.105-6.928-6.928 0-3.823 3.105-6.928 6.928-6.928.324 0 .643.023.956.068v3.2a3.732 3.732 0 00-.956-.123c-2.062 0-3.732 1.67-3.732 3.732 0 2.062 1.67 3.732 3.732 3.732 2.062 0 3.732-1.67 3.732-3.732V0z"/>
+                </svg>
+                <span class="text-white">TikTok</span>
+            </a>
+        </div>
     </footer>
 
     <script type="module">
@@ -415,7 +455,7 @@
             getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
-           getFirestore, doc, getDoc, setDoc, collectionGroup, getDocs
+           getFirestore,collectionGroup,getDocs
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const rawData = [
@@ -447,7 +487,7 @@
             "CREATIVIDAD|Imaginación|Facultad inventiva","IMAGINACION|Mente|Creación mental","INSPIRACION|Arte|Chispa creativa","DICCIONARIO|Libro|Libro de palabras","ESPECTACULO|Función|Show público","COMPUTADORA|Tecnología|Ordenador personal","ESTUDIANTES|Alumnos|Quienes aprenden","MOTOCICLETA|Vehículo|Vehículo motorizado de dos ruedas","HELICOPTERO|Aeronave|Aeronave con hélices","EXPLORACION|Viaje|Búsqueda de lo desconocido","FERROCARRIL|Transporte|Sistema de trenes","TRANSBORDAR|Viaje|Cambiar de transporte","AMBULANCIAS|Salud|Vehículos de emergencia","RESTAURANTE|Comida|Lugar para comer","INGREDIENTE|Cocina|Parte de una receta","AGRICULTURA|Campo|Cultivo de la tierra","PESCADERIAS|Comercio|Donde venden peces","CARNICERIAS|Comercio|Venta de carnes","PASTELERIAS|Comercio|Venta de dulces y pasteles","CARPINTERIA|Taller|Taller de madera","FONTANERIAS|Oficio|Trabajos de tuberías","CERRAJERIAS|Oficio|Fabricación de llaves","PROGRAMADOR|Tecnología|Creador de software","ARQUITECTOS|Profesión|Diseñadores de casas","VETERINARIO|Salud|Médico de animales","ODONTOLOGOS|Salud|Médicos de dientes","PARAMEDICOS|Salud|Personal de emergencia","PERIODISTAS|Noticias|Reportan la verdad","HISTORIADOR|Estudio|Experto en el pasado","CIENTIFICOS|Ciencia|Investigadores exactos","ASTRONAUTAS|Espacio|Viajeros del cosmos","MATEMATICOS|Ciencia|Expertos en números","ESTADISTICA|Matemática|Análisis de datos","PORCENTAJES|Matemática|Medidas proporcionales","MULTIPLICAR|Operación|Operación matemática","EXAMINACION|Prueba|Evaluación rigurosa","RENDIMIENTO|Desempeño|Capacidad de trabajo","CONTESTARON|Respuesta|Verbo responder","INFORMACION|Datos|Conjunto de datos","COMUNICADOR|Medios|Persona que transmite","TRANSMISION|Señal|Emisión de datos","FRECUENCIAS|Física|Ondas repetitivas","RADIOGRAFIA|Medicina|Imagen de huesos","ULTRASONIDO|Medicina|Eco médico","TRATAMIENTO|Salud|Cura médica","ANTIBIOTICO|Medicina|Medicina para infecciones","INYECCIONES|Medicina|Vacunas aplicadas","TERMOMETROS|Salud|Miden la temperatura","SENTIMIENTO|Emoción|Estado de ánimo","ADOLESCENTE|Juventud|Etapa antes de ser adulto",
 
             // 12 LETRAS (50)
-            "CONSTITUCION|Ley|Ley máxima de un país","INVESTIGADOR|Ciencia|Quien busca respuestas","TRANQUILIDAD|Paz|Estado de profunda calma","CONOCIMIENTO|Saber|Información aprendida","ARCHIPIELAGO|Islas|Conjunto de islas","ASTRONOMICOS|Espacio|Relativo al cosmos","NACIONALIDAD|Origen|País de procedencia","DEMOCRATICOS|Política|Sistemas de libertad","LEGISLADORES|Política|Quienes hacen las leyes","JURISDICCION|Ley|Autoridad legal","DEPARTAMENTO|División|Área de un lugar","AYUNTAMIENTO|Gobierno|Gobierno de ciudad","SUPERVISORES|Trabajo|Quienes controlan tareas","TRABAJADORES|Empleo|Quienes laboran","PRESTAMISTAS|Finanzas|Quien da dinero","CONSUMIDORES|Comercio|Quienes compran","DISTRIBUIDOR|Comercio|Quien reparte","EXPORTADORES|Comercio|Venden al exterior","IMPORTADORES|Comercio|Compran del exterior","COMERCIANTES|Negocios|Vendedores formales","ADOLESCENCIA|Etapa|Transición a la adultez","PALEONTOLOGO|Ciencia|Estudia los fósiles","BACTERIOLOGO|Ciencia|Estudia las bacterias","MICROBIOLOGO|Ciencia|Estudia los microbios","EPIDEMIOLOGO|Medicina|Experto en epidemias","METEOROLOGOS|Clima|Expertos en clima","CLIMATOLOGIA|Estudio|Ciencia del clima","OCEANOGRAFIA|Ciencia|Estudio de los mares","VULCANOLOGIA|Ciencia|Estudio de los volcanes","SISMOLOGICOS|Geología|Relativo a temblores","AEROESPACIAL|Tecnología|Ciencia del espacio","POLARIZACION|Física|Efecto magnético o visual","ELECTRICIDAD|Energía|Energía de corriente","FLUORESCENTE|Luz|Luz que brilla intensamente","CRISTALIZADO|Química|Convertido en cristal","METAMORFOSIS|Biología|Transformación biológica","FOTOSINTESIS|Plantas|Proceso verde de plantas","REPRODUCCION|Biología|Creación de vida","RESPIRATORIO|Cuerpo|Sistema para respirar","CIRCULATORIO|Cuerpo|Sistema de la sangre","NEUROLOGICOS|Medicina|De los nervios","PSICOLOGICOS|Mente|Relativo a la mente","PSIQUIATRICO|Salud|Hospital mental","TERAPEUTICOS|Curación|Tratamientos de cura","REHABILITADO|Salud|Persona que se ha curado","FARMACEUTICO|Medicina|Químico de medicinas","ODONTOLOGICO|Salud|Relativo a los dientes","OFTALMOLOGOS|Salud|Médicos de los ojos","DERMATOLOGOS|Salud|Médicos de la piel","TRAUMATOLOGO|Salud|Médicos de los huesos"
+            "CONSTITUCION|Ley|Ley máxima de un país","INVESTIGADOR|Ciencia|Quien busca respuestas","TRANQUILIDAD|Paz|Estado de profunda calma","CONOCIMIENTO|Saber|Información aprendida","ARCHIPIELAGO|Islas|Conjunto de islas","ASTRONOMICOS|Espacio|Relativo al cosmos","NACIONALIDAD|Origen|País de procedencia","DEMOCRATICOS|Política|Sistemas de libertad","LEGISLADORES|Política|Quienes hacen las leyes","JURISDICCION|Ley|Autoridad legal","DEPARTAMENTO|División|Área de un lugar","AYUNTAMIENTO|Gobierno|Gobierno de ciudad","SUPERVISORES|Trabajo|Quienes controlan tareas","TRABAJADORES|Empleo|Quienes laboran","PRESTAMISTAS|Finanzas|Quien da dinero","CONSUMIDORES|Comercio|Quienes compran","DISTRIBUIDOR|Comercio|Quien reparte","EXPORTADORES|Comercio|Venden al exterior","IMPORTADORES|Comercio|Compran del exterior","COMERCIANTES|Negocios|Vendedores formales","ADOLESCENCIA|Etapa|Transición a la adultez","PALEONTOLOGO|Ciencia|Estudia los fósiles","BACTERIOLOGO|Ciencia|Estudia las bacterias","MICROBIOLOGO|Ciencia|Estudia los microbios","EPIDEMIOLOGO|Medicina|Experto en epidemias","METEOROLOGOS|Clima|Expertos en clima","CLIMATOLOGIA|Estudio|Ciencia del clima","OCEANOGRAFIA|Ciencia|Estudio de los mares","VULCANOLOGIA|Ciencia|Estudio de los volcanes","SISMOLOGICOS|Geología|Relativo a temblores","AEROESPACIAL|Tecnología|Ciencia del espacio","POLARIZACION|Física|Efecto magnético o visual","ELECTRICIDAD|Energía|Energía de corriente","FLUORESCENTE|Luz|Luz que brilla intensamente","CRISTALIZADO|Química|Convertido en cristal","METAMORFOSIS|Biología|Transformación biológica","FOTOSINTESIS|Plantas|Proceso verde de plantas","REPRODUCCION|Biología|Creación de vida","RESPIRATORIO|Cuerpo|Sistema para respirar","CIRCULATORIO|Cuerpo|Sistema de la sangre","NEUROLOGICOS|Medicina|De los nervios","PSICOLOGICOS|Mente|Relativo a la mente","PSIQUIATRICO|Salud|Hospital mental","TERAPEUTICOS|Curación|Tratamientos de cura","REHABILITADO|Salud|Persona que se ha curado","FARMACEUTICO|Medicina|Químico de medicinas","ODONTOLOGICO|Salud|Relativo aos dientes","OFTALMOLOGOS|Salud|Médicos de los ojos","DERMATOLOGOS|Salud|Médicos de la piel","TRAUMATOLOGO|Salud|Médicos de los huesos"
         ];
 
         const DICTIONARY = rawData.map(line => {
@@ -493,6 +533,34 @@
             const winRate = userStats.played > 0 ? Math.round((userStats.won / userStats.played) * 100) : 0;
             document.getElementById("stat-winrate").textContent = `${winRate}%`;
             document.getElementById("stat-streak").textContent = userStats.streak;
+            
+            // Actualizar también la racha en el pie de página al lado del botón de TikTok
+            const footerStreakVal = document.getElementById("footer-streak-val");
+            if (footerStreakVal) {
+                footerStreakVal.textContent = userStats.streak;
+            }
+        }
+
+        // Función para activar la animación de fuego si la racha es múltiplo de 5 (ej. 5, 10, 15...)
+        function checkAndTriggerFireMilestone(streak) {
+            if (streak > 0 && streak % 5 === 0) {
+                const container = document.getElementById("fire-milestone-container");
+                const box = document.getElementById("fire-milestone-box");
+                const numSpan = document.getElementById("milestone-streak-num");
+                
+                numSpan.textContent = streak;
+                container.classList.remove("hidden");
+                box.classList.remove("fire-milestone-popup");
+                // Forzar reflow para reiniciar la animación CSS
+                void box.offsetWidth;
+                box.classList.add("fire-milestone-popup");
+
+                // Ocultar después de que termine la animación (2.5s)
+                setTimeout(() => {
+                    container.classList.add("hidden");
+                    box.classList.remove("fire-milestone-popup");
+                }, 2500);
+            }
         }
 
         const boardEl = document.getElementById("board");
@@ -631,7 +699,6 @@
                 if (i < currentGuess.length) {
                     cell.textContent = currentGuess[i];
                     cell.classList.add("border-white/40", "pop-animation");
-                    // Remove animation class after it completes so it can trigger again if needed
                     setTimeout(() => cell.classList.remove("pop-animation"), 200);
                 } else {
                     cell.textContent = "";
@@ -676,7 +743,7 @@
             for (let i = 0; i < targetWord.length; i++) {
                 if (guessChars[i] === targetChars[i]) {
                     result[i] = 'correct';
-                    targetChars[i] = null; // Mark used
+                    targetChars[i] = null;
                     guessChars[i] = null;
                 }
             }
@@ -701,7 +768,6 @@
                 setTimeout(() => {
                     cells[i].classList.add("flip-tile");
                     
-                    // Change color halfway through flip
                     setTimeout(() => {
                         cells[i].classList.remove("bg-white/5", "border-white/10", "border-white/40");
                         if (result[i] === 'correct') {
@@ -714,13 +780,12 @@
                             cells[i].classList.add("tile-absent", "border-transparent");
                             updateKeyboardColor(currentGuess[i], 'absent');
                         }
-                    }, 300); // Half of flip duration
+                    }, 300);
 
                 }, delay);
-                delay += 150; // Stagger effect
+                delay += 150;
             }
 
-            // Wait for all animations to finish before moving to next state
             setTimeout(() => {
                 checkGameState();
             }, delay + 300);
@@ -730,7 +795,6 @@
             const keyBtn = document.querySelector(`.key-btn[data-key="${letter}"]`);
             if (!keyBtn) return;
 
-            // Prioritize correct > present > absent
             if (keyBtn.classList.contains("tile-correct")) return; 
             
             if (status === 'correct') {
@@ -751,7 +815,6 @@
                 skipBtn.classList.add("hidden");
                 showMessage("¡Magnífico! 🎉", 4000);
                 
-                // Show long hint as reward
                 clueText.textContent = currentWordObj.longDesc;
                 hintBox.classList.remove("hidden", "opacity-0", "scale-95");
                 hintBox.classList.add("pulse-glow");
@@ -760,6 +823,10 @@
                 userStats.won++;
                 userStats.played++;
                 userStats.streak++;
+                
+                // Verificar hito de racha de fuego cada 5 niveles
+                checkAndTriggerFireMilestone(userStats.streak);
+
                 saveLocalStats();
                 if (typeof saveCloudStats === 'function') saveCloudStats();
                 
@@ -775,7 +842,6 @@
                 skipBtn.classList.add("hidden");
                 showMessage(`La palabra era: ${targetWord}`, 5000);
                 
-                // Show long hint on loss (which is the last attempt)
                 clueText.textContent = currentWordObj.longDesc;
                 hintBox.classList.remove("hidden", "opacity-0", "scale-95");
                 hintBox.classList.remove("pulse-glow");
@@ -792,12 +858,10 @@
             } else {
                 currentGuess = "";
                 
-                // Show short hint on attempt maxAttempts - 2 (antepenúltimo)
                 if (currentAttempt === maxAttempts - 2) {
                     clueText.textContent = currentWordObj.shortDesc;
                     hintBox.classList.remove("hidden", "opacity-0", "scale-95");
                 }
-                // Show long hint on attempt maxAttempts - 1 (penúltimo)
                 else if (currentAttempt === maxAttempts - 1) {
                     clueText.textContent = currentWordObj.longDesc;
                     hintBox.classList.remove("hidden", "opacity-0", "scale-95");
@@ -805,19 +869,15 @@
             }
         }
 
-        // Keyboard clicks
         keys.forEach(btn => {
             btn.addEventListener("click", () => {
                 handleInput(btn.dataset.key);
-                // Haptic feedback simulation
                 if (navigator.vibrate) navigator.vibrate(10);
             });
         });
 
-        // Physical Keyboard
         document.addEventListener("keydown", (e) => {
             if(gameOver) return;
-            // Ignore if typing in inputs
             if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
             
             const key = e.key.toUpperCase();
@@ -838,7 +898,6 @@
             showMessage("Palabra cambiada ⏭️", 2000);
         });
 
-        // Modal Logic Helper
         function toggleModal(modal, content, show) {
             if (show) {
                 modal.classList.remove("opacity-0", "pointer-events-none");
@@ -851,33 +910,28 @@
             }
         }
 
-        // Stats Modal
         const openStats = () => { updateStatsUI(); toggleModal(statsModal, document.getElementById("stats-modal-content"), true); };
         const closeStats = () => toggleModal(statsModal, document.getElementById("stats-modal-content"), false);
         statsBtn.addEventListener("click", openStats);
         closeStatsBtn.addEventListener("click", closeStats);
         modalCloseAction.addEventListener("click", closeStats);
 
-        // Help Modal
         const openHelp = () => toggleModal(helpModal, document.getElementById("help-modal-content"), true);
         const closeHelp = () => toggleModal(helpModal, document.getElementById("help-modal-content"), false);
         helpBtn.addEventListener("click", openHelp);
         closeHelpBtn.addEventListener("click", closeHelp);
         modalHelpCloseAction.addEventListener("click", closeHelp);
 
-        // Suggest Modal
         const openSuggest = () => toggleModal(suggestModal, document.getElementById("suggest-modal-content"), true);
         const closeSuggest = () => toggleModal(suggestModal, document.getElementById("suggest-modal-content"), false);
         suggestBtn.addEventListener("click", openSuggest);
         closeSuggestBtn.addEventListener("click", closeSuggest);
 
-        // Bug Modal
         const openBug = () => toggleModal(bugModal, document.getElementById("bug-modal-content"), true);
         const closeBug = () => toggleModal(bugModal, document.getElementById("bug-modal-content"), false);
         bugBtn.addEventListener("click", openBug);
         closeBugBtn.addEventListener("click", closeBug);
 
-        // Words / Diccionario Modal Logic
         function renderWordsList() {
             const grouped = {};
             DICTIONARY.forEach(item => {
@@ -910,7 +964,7 @@
                     } else {
                         wordBadge.title = "Bloqueado";
                         wordBadge.textContent = '*'.repeat(item.word.length);
-                        wordBadge.classList.add("blur-[2px]", "opacity-50"); // Efecto pixeliado/borroso
+                        wordBadge.classList.add("blur-[2px]", "opacity-50");
                     }
                     
                     let showingDesc = false;
@@ -946,7 +1000,6 @@
         }
 
         const openWords = () => { 
-            // Controlar vista del PIN dependiendo de si ya está desbloqueado
             if (!dictionaryUnlocked) {
                 document.getElementById('dic-unlock-container').classList.remove('hidden');
                 document.getElementById('dic-pin').value = '';
@@ -961,7 +1014,6 @@
         wordsBtn.addEventListener("click", openWords);
         closeWordsBtn.addEventListener("click", closeWords);
 
-        // Lógica del botón desbloquear
         document.getElementById('dic-unlock-btn').addEventListener('click', () => {
             const pin = document.getElementById('dic-pin').value;
             if (pin === '140703') {
@@ -1026,7 +1078,6 @@
             }, 1000);
         });
 
-        // Firebase Cloud Save & Google Auth Logic
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'palabra-secreta';
         let db, auth, provider;
         let currentUser = null;
@@ -1082,7 +1133,7 @@
                         authBtn.classList.replace('hover:to-pink-500', 'hover:to-purple-500');
                         userAvatarEl.innerHTML = '👤';
                         userAvatarEl.classList.add('flex', 'items-center', 'justify-center', 'text-xs', 'font-bold', 'text-white', 'uppercase');
-                        loadLocalStats(); // Revert to local stats
+                        loadLocalStats();
                     }
                 });
             }
@@ -1114,10 +1165,9 @@
                 const docSnap = await getDoc(statsRef);
                 if (docSnap.exists()) {
                     userStats = docSnap.data();
-                    saveLocalStats(); // Sincronizar hacia local
+                    saveLocalStats();
                     updateStatsUI();
                 } else {
-                    // Si no tiene datos en la nube, subir su progreso local actual
                     await setDoc(statsRef, userStats);
                 }
             } catch (e) {
@@ -1135,31 +1185,25 @@
             }
         }
 
-        // Initialize App
         loadLocalStats();
         initGame();
 
-        // Ocultar pantalla de carga después de la animación
         window.addEventListener('load', () => {
             const splashScreen = document.getElementById('splash-screen');
-            // Esperamos 2 segundos para mostrar la animación inicial
             setTimeout(() => {
                 splashScreen.classList.add('opacity-0', 'scale-110');
                 splashScreen.style.pointerEvents = 'none';
-                
-                // Remover el elemento del DOM una vez termine la transición (700ms)
                 setTimeout(() => {
                     splashScreen.remove();
                 }, 700);
             }, 2000);
         });
 
-        // Show help on first visit
         if (userStats.played === 0 && !localStorage.getItem('palabra_secreta_help_seen')) {
             setTimeout(() => {
                 openHelp();
                 localStorage.setItem('palabra_secreta_help_seen', 'true');
-            }, 3000); // Retrasamos un poco el modal para que no se pise con la pantalla de carga
+            }, 3000);
         }
 
     </script>
