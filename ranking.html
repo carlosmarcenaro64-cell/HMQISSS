@@ -74,6 +74,7 @@
         By: Marcenaroc64
     </footer>
 
+    <!-- PIN Modal -->
     <div id="pin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center">
             <h3 class="text-base font-semibold text-slate-200 mb-2">Acceso Restringido</h3>
@@ -92,8 +93,10 @@
         import { getFirestore, collectionGroup, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'palabra-secreta';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyDummyKeyForFallback",
+        
+        // Use real production configuration if deployed on GitHub Pages or custom domain, with fallback
+        const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config) ? JSON.parse(__firebase_config) : {
+            apiKey: "TU_API_KEY_REAL_DE_FIREBASE",
             authDomain: "palabra-secre.firebaseapp.com",
             projectId: "palabra-secre"
         };
@@ -236,7 +239,7 @@
             } catch (err) {
                 console.error(err);
                 diagnosticContent.textContent = `❌ Error general de conexión: ${err.message}`;
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-400">Error al cargar datos. Revisa la consola o permisos de Firebase.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-red-400 text-center px-4">Error al conectar con Firebase (Posible API Key incorrecta o bloqueada en GitHub Pages).</td></tr>`;
             }
         }
 
