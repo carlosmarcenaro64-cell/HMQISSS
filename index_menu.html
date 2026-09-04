@@ -1,1 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Principal - Palabra Secreta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
+    <header class="p-4 sm:p-6 flex items-center justify-between max-w-4xl mx-auto w-full">
+        <a href="index.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition text-slate-300 text-sm font-medium shadow-lg">
+            ← Volver al Juego
+        </a>
+        <div class="flex items-center gap-2">
+            <span class="text-xs uppercase tracking-widest text-indigo-400 font-semibold px-3 py-1 rounded-full bg-indigo-950/50 border border-indigo-800/40">Palabra Secreta</span>
+        </div>
+    </header>
+
+    <main class="flex-grow px-4 py-8 max-w-xl mx-auto w-full flex flex-col items-center justify-center">
+        
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center p-3 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl mb-4 shadow-inner">
+                <span class="text-4xl">🎮</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-extrabold bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-500 bg-clip-text text-transparent">
+                MENÚ PRINCIPAL
+            </h1>
+            <p class="text-slate-400 text-sm sm:text-base mt-2">Selecciona el modo de juego o sección que deseas explorar</p>
+        </div>
+
+        <div class="w-full grid gap-4">
+            
+            <!-- Volver al juego principal -->
+            <a href="index.html" class="group flex items-center justify-between p-5 bg-slate-900/80 border border-slate-800 hover:border-indigo-500/60 rounded-2xl shadow-xl transition-all duration-300 hover:translate-y-[-2px] hover:bg-slate-900">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-xl group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-md">
+                        🏠
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-slate-200 group-hover:text-indigo-300 transition-colors">Volver</h2>
+                        <p class="text-xs text-slate-400">Regresar a la partida principal en español</p>
+                    </div>
+                </div>
+                <span class="text-slate-600 group-hover:text-indigo-400 font-bold transition-colors text-lg">→</span>
+            </a>
+
+            <!-- Ranking Global -->
+            <a href="ranking.html" class="group flex items-center justify-between p-5 bg-slate-900/80 border border-slate-800 hover:border-amber-500/60 rounded-2xl shadow-xl transition-all duration-300 hover:translate-y-[-2px] hover:bg-slate-900">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-xl group-hover:bg-amber-600 group-hover:text-white transition-colors shadow-md">
+                        🏆
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-slate-200 group-hover:text-amber-300 transition-colors">Ranking</h2>
+                        <p class="text-xs text-slate-400">Tabla de líderes globales y estadísticas</p>
+                    </div>
+                </div>
+                <span class="text-slate-600 group-hover:text-amber-400 font-bold transition-colors text-lg">→</span>
+            </a>
+
+            <!-- Modo Temperatura -->
+            <a href="index_temp.html" class="group flex items-center justify-between p-5 bg-slate-900/80 border border-slate-800 hover:border-orange-500/60 rounded-2xl shadow-xl transition-all duration-300 hover:translate-y-[-2px] hover:bg-slate-900">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-xl group-hover:bg-orange-600 group-hover:text-white transition-colors shadow-md">
+                        🌡️
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-slate-200 group-hover:text-orange-300 transition-colors">Modo Temperatura</h2>
+                        <p class="text-xs text-slate-400">Juega guiado por pistas de frío o calor</p>
+                    </div>
+                </div>
+                <span class="text-slate-600 group-hover:text-orange-400 font-bold transition-colors text-lg">→</span>
+            </a>
+
+            <!-- Modo Inglés -->
+            <a href="index_en.html" class="group flex items-center justify-between p-5 bg-slate-900/80 border border-slate-800 hover:border-cyan-500/60 rounded-2xl shadow-xl transition-all duration-300 hover:translate-y-[-2px] hover:bg-slate-900">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-xl group-hover:bg-cyan-600 group-hover:text-white transition-colors shadow-md">
+                        🇬🇧
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-slate-200 group-hover:text-cyan-300 transition-colors">Modo Inglés</h2>
+                        <p class="text-xs text-slate-400">Adivina palabras en idioma inglés</p>
+                    </div>
+                </div>
+                <span class="text-slate-600 group-hover:text-cyan-400 font-bold transition-colors text-lg">→</span>
+            </a>
+
+        </div>
+
+    </main>
+
+    <footer class="py-6 text-center text-xs text-slate-600">
+        By: Marcenaroc64
+    </footer>
+
+</body>
+</html>
