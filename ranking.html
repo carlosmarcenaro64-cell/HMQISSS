@@ -2,1033 +2,251 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ranking Global - Palabra Secreta</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-        @import url(
-            'https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap'
-        );
-
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap');
         body {
             font-family: 'Outfit', sans-serif;
         }
-
         .ranking-row {
             transition: 0.2s;
         }
-
         .ranking-row:hover {
             transform: scale(1.01);
         }
     </style>
 </head>
-
-
-<body
-    class="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950 text-white flex flex-col items-center p-4"
->
-
+<body class="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950 text-white flex flex-col items-center p-4">
 
     <!-- =========================
          ENCABEZADO
     ========================== -->
-
-    <header
-        class="w-full max-w-2xl text-center mb-6"
-    >
-
-        <div
-            class="flex items-center justify-between mb-6"
-        >
-
+    <header class="w-full max-w-2xl text-center mb-6">
+        <div class="flex items-center justify-between mb-6">
             <button
                 id="back-button"
                 class="bg-white/10 hover:bg-white/20 border border-white/10 px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-95"
             >
                 ← Volver
             </button>
-
-
-            <span
-                class="text-xs text-indigo-300"
-            >
+            <span class="text-xs text-indigo-300">
                 Palabra Secreta
             </span>
-
         </div>
-
-
-        <div
-            class="text-5xl mb-2"
-        >
+        <div class="text-5xl mb-2">
             🏆
         </div>
-
-
-        <h1
-            class="text-3xl md:text-4xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400"
-        >
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-pink-400">
             RANKING GLOBAL
         </h1>
-
-
-        <p
-            class="text-indigo-200 text-sm mt-2"
-        >
-            Los mejores jugadores de Palabra Secreta
+        <p class="text-indigo-200 text-sm mt-2">
+            Diagnóstico y Tabla de Líderes
         </p>
-
     </header>
-
-
 
     <!-- =========================
          CONTENEDOR PRINCIPAL
     ========================== -->
-
-    <main
-        class="w-full max-w-2xl"
-    >
-
+    <main class="w-full max-w-2xl">
 
         <!-- CARGANDO -->
-
-        <div
-            id="loading"
-            class="bg-white/10 border border-white/10 rounded-2xl p-8 text-center"
-        >
-
-            <div
-                class="text-4xl animate-bounce mb-3"
-            >
-                🏆
+        <div id="loading" class="bg-white/10 border border-white/10 rounded-2xl p-8 text-center">
+            <div class="text-4xl animate-bounce mb-3">
+                🔍
             </div>
-
-
-            <p
-                class="text-indigo-200"
-            >
-                Cargando ranking...
+            <p id="loading-text" class="text-indigo-200">
+                Consultando Firestore...
             </p>
-
         </div>
-
-
 
         <!-- TABLA -->
-
-        <div
-            id="ranking-container"
-            class="hidden"
-        >
-
-
+        <div id="ranking-container" class="hidden">
             <!-- CABECERA -->
-
-            <div
-                class="grid grid-cols-5 gap-2 text-center text-[10px] md:text-xs text-indigo-300 font-bold uppercase mb-2 px-3"
-            >
-
-                <div>
-                    Pos.
-                </div>
-
-
-                <div>
-                    Jugador
-                </div>
-
-
-                <div>
-                    Ganadas
-                </div>
-
-
-                <div>
-                    Jugadas
-                </div>
-
-
-                <div>
-                    % Victoria
-                </div>
-
+            <div class="grid grid-cols-5 gap-2 text-center text-[10px] md:text-xs text-indigo-300 font-bold uppercase mb-2 px-3">
+                <div>Pos.</div>
+                <div>Jugador</div>
+                <div>Ganadas</div>
+                <div>Jugadas</div>
+                <div>% Victoria</div>
             </div>
-
-
-
             <!-- LISTA -->
-
-            <div
-                id="ranking-list"
-                class="space-y-2"
-            >
+            <div id="ranking-list" class="space-y-2">
             </div>
-
         </div>
 
-
-
-        <!-- SIN JUGADORES -->
-
-        <div
-            id="empty-ranking"
-            class="hidden bg-white/10 border border-white/10 rounded-2xl p-8 text-center"
-        >
-
-            <div
-                class="text-5xl mb-3"
-            >
-                🎮
+        <!-- PANTALLA DE DIAGNÓSTICO (SIEMPRE MUESTRA QUÉ ENCONTRÓ) -->
+        <div id="debug-section" class="hidden mt-4 bg-black/40 border border-yellow-500/30 rounded-2xl p-6">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-2xl">🛠️</span>
+                <h2 class="text-base font-bold text-yellow-300">
+                    Panel de Diagnóstico Firestore
+                </h2>
             </div>
-
-
-            <h2
-                class="text-xl font-bold"
-            >
-                Aún no hay jugadores
-            </h2>
-
-
-            <p
-                class="text-indigo-300 text-sm mt-2"
-            >
-                ¡Sé el primero en entrar al ranking!
+            <p class="text-xs text-indigo-200 mb-3">
+                Si la tabla de arriba está vacía, aquí verás exactamente qué documentos y rutas leyó tu base de datos:
             </p>
-
+            <div id="debug-info" class="text-xs text-emerald-300 font-mono bg-black/70 p-4 rounded-xl overflow-x-auto max-h-60 border border-white/10 whitespace-pre-wrap">
+                Iniciando escaneo...
+            </div>
         </div>
-
-
 
         <!-- ERROR -->
-
-        <div
-            id="error-box"
-            class="hidden bg-red-500/10 border border-red-500/30 rounded-2xl p-6 text-center"
-        >
-
-            <div
-                class="text-3xl mb-2"
-            >
+        <div id="error-box" class="hidden bg-red-500/10 border border-red-500/30 rounded-2xl p-6 text-center mt-4">
+            <div class="text-3xl mb-2">
                 ⚠️
             </div>
-
-
-            <p
-                class="font-bold text-red-300"
-            >
-                No se pudo cargar el ranking
+            <p class="font-bold text-red-300">
+                Error de conexión o permisos
             </p>
-
-
-            <p
-                id="error-text"
-                class="text-xs text-red-200 mt-2 break-words"
-            >
+            <p id="error-text" class="text-xs text-red-200 mt-2 break-words">
             </p>
-
         </div>
-
     </main>
-
-
 
     <!-- =========================
          FOOTER
     ========================== -->
-
-    <footer
-        class="mt-auto pt-8 text-xs text-indigo-300"
-    >
-
-        By:
-
-        <span
-            class="font-bold text-pink-400"
-        >
-            Marcenaroc64
-        </span>
-
+    <footer class="mt-auto pt-8 text-xs text-indigo-300">
+        By: <span class="font-bold text-pink-400">Marcenaroc64</span>
     </footer>
 
-
-
     <!-- =========================
-         FIREBASE
+         FIREBASE SCRIPT
     ========================== -->
-
     <script type="module">
-
-
-        import {
-            initializeApp
-        }
-        from
-        "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-
-
-        import {
-            getFirestore,
-            collection,
-            collectionGroup,
-            getDocs,
-            doc,
-            getDoc
-        }
-        from
-        "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-
-        /*
-        ============================================
-        CONFIGURACIÓN DE FIREBASE
-        ============================================
-
-        IMPORTANTE:
-
-        COPIA EXACTAMENTE LA MISMA CONFIGURACIÓN
-        firebaseConfig QUE ESTÁ EN TU index.html.
-
-        Busca en index.html:
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collectionGroup, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
-
-        ...
-
-        };
-
-        Y COPIA TODO EL BLOQUE AQUÍ.
-        */
-
-
-        const firebaseConfig = {
-
              apiKey: "AIzaSyC7hjuWiRx3uBdfKAS3mj9na6zqO6xtQUY",
              authDomain: "palabra-secre.firebaseapp.com",
              projectId: "palabra-secre",
              storageBucket: "palabra-secre.firebasestorage.app",
              messagingSenderId: "1057501011597",
-            appId: "1:1057501011597:web:ab2dd815a8ad9a293cccc4"
-
-
+             appId: "1:1057501011597:web:ab2dd815a8ad9a293cccc4"
         };
 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
+        const loading = document.getElementById("loading");
+        const loadingText = document.getElementById("loading-text");
+        const rankingContainer = document.getElementById("ranking-container");
+        const rankingList = document.getElementById("ranking-list");
+        const debugSection = document.getElementById("debug-section");
+        const debugInfo = document.getElementById("debug-info");
+        const errorBox = document.getElementById("error-box");
+        const errorText = document.getElementById("error-text");
 
-        /*
-        ============================================
-        INICIALIZAR FIREBASE
-        ============================================
-        */
+        document.getElementById("back-button").addEventListener("click", () => {
+            window.location.href = "./index.html";
+        });
 
-
-        const app =
-            initializeApp(
-                firebaseConfig
-            );
-
-
-        const db =
-            getFirestore(
-                app
-            );
-
-
-
-        /*
-        ============================================
-        ELEMENTOS HTML
-        ============================================
-        */
-
-
-        const loading =
-            document.getElementById(
-                "loading"
-            );
-
-
-        const rankingContainer =
-            document.getElementById(
-                "ranking-container"
-            );
-
-
-        const rankingList =
-            document.getElementById(
-                "ranking-list"
-            );
-
-
-        const emptyRanking =
-            document.getElementById(
-                "empty-ranking"
-            );
-
-
-        const errorBox =
-            document.getElementById(
-                "error-box"
-            );
-
-
-        const errorText =
-            document.getElementById(
-                "error-text"
-            );
-
-
-
-        /*
-        ============================================
-        BOTÓN VOLVER
-        ============================================
-        */
-
-
-        document
-            .getElementById(
-                "back-button"
-            )
-            .addEventListener(
-                "click",
-                () => {
-
-                    /*
-                    Va directamente al index.html
-                    */
-
-                    window.location.href =
-                        "./index.html";
-
-                }
-            );
-
-
-
-        /*
-        ============================================
-        MEDALLAS
-        ============================================
-        */
-
-
-        function getPositionEmoji(
-            position
-        ) {
-
-
-            if (
-                position === 1
-            ) {
-
-                return "🥇";
-
-            }
-
-
-            if (
-                position === 2
-            ) {
-
-                return "🥈";
-
-            }
-
-
-            if (
-                position === 3
-            ) {
-
-                return "🥉";
-
-            }
-
-
+        function getPositionEmoji(position) {
+            if (position === 1) return "🥇";
+            if (position === 2) return "🥈";
+            if (position === 3) return "🥉";
             return "#" + position;
-
         }
-
-
-
-        /*
-        ============================================
-        CARGAR RANKING
-        ============================================
-
-        El juego original guarda:
-
-        artifacts
-        └── APP_ID
-            └── users
-                └── USER_ID
-                    └── gameData
-                        └── stats
-
-
-        Por eso usamos collectionGroup("stats").
-        */
-
 
         async function loadRanking() {
-
-
             try {
-
-
-                /*
-                ====================================
-                BUSCAR TODAS LAS ESTADÍSTICAS
-                ====================================
-                */
-
-
-                const statsSnapshot =
-                    await getDocs(
-                        collectionGroup(
-                            db,
-                            "stats"
-                        )
-                    );
-
-
-                const players =
-                    [];
-
-
-                /*
-                ====================================
-                RECORRER ESTADÍSTICAS
-                ====================================
-                */
-
-
-                for (
-                    const statsDocument
-                    of statsSnapshot.docs
-                ) {
-
-
-                    const data =
-                        statsDocument.data();
-
-
-                    /*
-                    Obtener UID desde la ruta.
-
-                    Ruta:
-
-                    artifacts / appId / users / UID /
-                    gameData / stats
-                    */
-
-
-                    const path =
-                        statsDocument.ref.path.split(
-                            "/"
-                        );
-
-
-                    /*
-                    Buscar dónde aparece "users"
-                    */
-
-
-                    const usersIndex =
-                        path.indexOf(
-                            "users"
-                        );
-
-
-                    let userId =
-                        null;
-
-
-                    if (
-                        usersIndex !== -1 &&
-                        path[
-                            usersIndex + 1
-                        ]
-                    ) {
-
-                        userId =
-                            path[
-                                usersIndex + 1
-                            ];
-
-                    }
-
-
-
-                    /*
-                    ====================================
-                    ESTADÍSTICAS
-                    ====================================
-                    */
-
-
-                    const won =
-                        Number(
-                            data.won || 0
-                        );
-
-
-                    const lost =
-                        Number(
-                            data.lost || 0
-                        );
-
-
-                    const played =
-                        Number(
-                            data.played ||
-                            won +
-                            lost
-                        );
-
-
-                    /*
-                    Solo jugadores que hayan jugado
-                    */
-
-
-                    if (
-                        played <= 0
-                    ) {
-
-                        continue;
-
-                    }
-
-
-
-                    /*
-                    ====================================
-                    NOMBRE
-                    ====================================
-
-                    Por defecto usamos:
-
-                    "Jugador"
-
-                    Si más adelante guardas el nombre
-                    en Firestore, aquí podremos mostrarlo.
-                    */
-
-
-                    let playerName =
-                        "Jugador";
-
-
-                    /*
-                    Intentar usar un nombre
-                    guardado en las estadísticas
-                    */
-
-
-                    if (
-                        data.displayName
-                    ) {
-
-                        playerName =
-                            data.displayName;
-
-                    }
-
-
-                    else if (
-                        data.name
-                    ) {
-
-                        playerName =
-                            data.name;
-
-                    }
-
-
-                    else if (
-                        data.username
-                    ) {
-
-                        playerName =
-                            data.username;
-
-                    }
-
-
-
-                    /*
-                    ====================================
-                    PORCENTAJE DE VICTORIA
-                    ====================================
-                    */
-
-
-                    const winRate =
-                        (
-                            won /
-                            played
-                        ) * 100;
-
-
-
-                    /*
-                    Agregar jugador
-                    */
-
-
-                    players.push(
-                        {
-
-
-                            id:
-                                userId ||
-                                statsDocument.id,
-
-
-                            name:
-                                playerName,
-
-
-                            won:
-                                won,
-
-
-                            played:
-                                played,
-
-
-                            lost:
-                                lost,
-
-
-                            winRate:
-                                winRate
-
-                        }
-                    );
-
-                }
-
-
-
-                /*
-                ====================================
-                ORDENAR
-                ====================================
-
-                1. Mayor porcentaje
-                2. Más victorias
-                3. Más partidas jugadas
-                */
-
-
-                players.sort(
-                    (
-                        a,
-                        b
-                    ) => {
-
-
-                        if (
-                            b.winRate !==
-                            a.winRate
-                        ) {
-
-                            return (
-                                b.winRate -
-                                a.winRate
-                            );
-
-                        }
-
-
-                        if (
-                            b.won !==
-                            a.won
-                        ) {
-
-                            return (
-                                b.won -
-                                a.won
-                            );
-
-                        }
-
-
-                        return (
-                            b.played -
-                            a.played
-                        );
-
-                    }
-                );
-
-
-
-                /*
-                ====================================
-                TOP 10
-                ====================================
-                */
-
-
-                const topPlayers =
-                    players.slice(
-                        0,
-                        10
-                    );
-
-
-
-                /*
-                Ocultar carga
-                */
-
-
-                loading.classList.add(
-                    "hidden"
-                );
-
-
-
-                /*
-                ====================================
-                SI NO HAY JUGADORES
-                ====================================
-                */
-
-
-                if (
-                    topPlayers.length === 0
-                ) {
-
-
-                    emptyRanking
-                        .classList
-                        .remove(
-                            "hidden"
-                        );
-
-
+                loadingText.textContent = "Buscando datos en Firestore...";
+                
+                // Realizamos la consulta por collectionGroup buscando "stats"
+                const statsSnapshot = await getDocs(collectionGroup(db, "stats"));
+                
+                let totalDocsFound = statsSnapshot.docs.length;
+                let diagnosticLog = `🔍 Documentos con subcolección 'stats' encontrados: ${totalDocsFound}\n\n`;
+
+                if (totalDocsFound === 0) {
+                    diagnosticLog += `⚠️ NO SE ENCONTRÓ NINGÚN DOCUMENTO BAJO EL GRUPO 'stats'.\n`;
+                    diagnosticLog += `Para solucionarlo:\n`;
+                    diagnosticLog += `1. Ve a tu consola de Firebase > Firestore Database.\n`;
+                    diagnosticLog += `2. Asegúrate de tener una colección principal (ej: 'users' o 'players'), un documento de usuario, y una subcolección llamada EXACTAMENTE 'stats'.\n`;
+                    diagnosticLog += `3. Dentro de 'stats', debe haber campos como { won: 3, played: 5, displayName: "TuNombre" }.`;
+                    
+                    loading.classList.add("hidden");
+                    debugSection.classList.remove("hidden");
+                    debugInfo.textContent = diagnosticLog;
                     return;
-
                 }
 
-
-
-                /*
-                ====================================
-                MOSTRAR RANKING
-                ====================================
-                */
-
-
-                rankingContainer
-                    .classList
-                    .remove(
-                        "hidden"
-                    );
-
-
-
-                /*
-                ====================================
-                CREAR FILAS
-                ====================================
-                */
-
-
-                topPlayers.forEach(
-                    (
-                        player,
-                        index
-                    ) => {
-
-
-                        const position =
-                            index + 1;
-
-
-                        const positionText =
-                            getPositionEmoji(
-                                position
-                            );
-
-
-
-                        /*
-                        ====================================
-                        ESTILO POR POSICIÓN
-                        ====================================
-                        */
-
-
-                        let positionClass =
-                            "bg-white/10 border-white/10";
-
-
-                        if (
-                            position === 1
-                        ) {
-
-
-                            positionClass =
-                                "bg-yellow-500/20 border-yellow-400/40";
-
-
-                        }
-
-
-                        else if (
-                            position === 2
-                        ) {
-
-
-                            positionClass =
-                                "bg-slate-300/10 border-slate-300/30";
-
-
-                        }
-
-
-                        else if (
-                            position === 3
-                        ) {
-
-
-                            positionClass =
-                                "bg-amber-700/20 border-amber-500/40";
-
-
-                        }
-
-
-
-                        /*
-                        ====================================
-                        CREAR FILA
-                        ====================================
-                        */
-
-
-                        const row =
-                            document.createElement(
-                                "div"
-                            );
-
-
-
-                        row.className =
-                            `ranking-row grid grid-cols-5 gap-2 items-center text-center p-3 rounded-xl border ${positionClass}`;
-
-
-
-                        row.innerHTML =
-                            `
-
-                            <div class="font-black text-sm md:text-base">
-
-                                ${positionText}
-
-                            </div>
-
-
-                            <div class="truncate font-bold text-xs md:text-sm text-indigo-100">
-
-                                ${player.name}
-
-                            </div>
-
-
-                            <div class="font-bold text-emerald-400 text-xs md:text-sm">
-
-                                ${player.won}
-
-                            </div>
-
-
-                            <div class="font-bold text-indigo-200 text-xs md:text-sm">
-
-                                ${player.played}
-
-                            </div>
-
-
-                            <div class="font-black text-yellow-300 text-xs md:text-sm">
-
-                                ${player.winRate.toFixed(
-                                    1
-                                )}%
-
-                            </div>
-
-                            `;
-
-
-
-                        rankingList.appendChild(
-                            row
-                        );
-
+                const players = [];
+
+                statsSnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    diagnosticLog += `• Ruta del doc: ${docSnap.ref.path}\n  Contenido: ${JSON.stringify(data)}\n`;
+
+                    // Extraer métricas con múltiples alternativas de nombres de campos
+                    const won = Number(data.won || data.ganadas || data.wins || 0);
+                    const lost = Number(data.lost || data.perdidas || 0);
+                    const played = Number(data.played || data.jugadas || (won + lost) || 0);
+
+                    let playerName = data.displayName || data.name || data.username || data.jugador || "Anónimo";
+
+                    if (played > 0 || won > 0) {
+                        const winRate = played > 0 ? (won / played) * 100 : 0;
+                        players.push({
+                            name: playerName,
+                            won: won,
+                            played: played,
+                            winRate: winRate
+                        });
+                        diagnosticLog += `  => ✅ Procesado correctamente\n\n`;
+                    } else {
+                        diagnosticLog += `  => ⚠️ Ignorado (partidas = 0 o campos no reconocidos)\n\n`;
                     }
-                );
+                });
 
+                debugSection.classList.remove("hidden");
+                debugInfo.textContent = diagnosticLog;
 
+                // Ordenar por % de victoria y luego partidas ganadas
+                players.sort((a, b) => {
+                    if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+                    if (b.won !== a.won) return b.won - a.won;
+                    return b.played - a.played;
+                });
+
+                const topPlayers = players.slice(0, 10);
+                loading.classList.add("hidden");
+
+                if (topPlayers.length > 0) {
+                    rankingContainer.classList.remove("hidden");
+                    topPlayers.forEach((player, index) => {
+                        const position = index + 1;
+                        const positionText = getPositionEmoji(position);
+
+                        let positionClass = "bg-white/15 border-white/10";
+                        if (position === 1) positionClass = "bg-yellow-500/20 border-yellow-400/40";
+                        else if (position === 2) positionClass = "bg-slate-300/15 border-slate-300/30";
+                        else if (position === 3) positionClass = "bg-amber-700/20 border-amber-500/40";
+
+                        const row = document.createElement("div");
+                        row.className = `ranking-row grid grid-cols-5 gap-2 items-center text-center p-3 rounded-xl border ${positionClass}`;
+                        row.innerHTML = `
+                            <div class="font-black text-sm md:text-base">${positionText}</div>
+                            <div class="truncate font-bold text-xs md:text-sm text-indigo-100">${player.name}</div>
+                            <div class="font-bold text-emerald-400 text-xs md:text-sm">${player.won}</div>
+                            <div class="font-bold text-indigo-200 text-xs md:text-sm">${player.played}</div>
+                            <div class="font-black text-yellow-300 text-xs md:text-sm">${player.winRate.toFixed(1)}%</div>
+                        `;
+                        rankingList.appendChild(row);
+                    });
+                }
+
+            } catch (error) {
+                console.error("Error al cargar el ranking:", error);
+                loading.classList.add("hidden");
+                errorBox.classList.remove("hidden");
+                errorText.textContent = error.message;
             }
-
-
-            catch (
-                error
-            ) {
-
-
-                console.error(
-                    "Error cargando ranking:",
-                    error
-                );
-
-
-
-                loading.classList.add(
-                    "hidden"
-                );
-
-
-                errorBox.classList.remove(
-                    "hidden"
-                );
-
-
-                errorText.textContent =
-                    error.message;
-
-            }
-
         }
 
-
-
-        /*
-        ============================================
-        INICIAR RANKING
-        ============================================
-        */
-
-
         loadRanking();
-
-
     </script>
-
-
 </body>
 </html>
