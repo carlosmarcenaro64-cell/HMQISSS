@@ -1,734 +1,87 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Ranking Global - Palabra Secreta</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
-</head>
-
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
-
-    <!-- HEADER -->
-    <header class="p-4 sm:p-6 flex items-center justify-between max-w-5xl mx-auto w-full">
-
-        <a href="./index.html"
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition text-slate-300 text-sm font-medium">
-            ← Volver
-        </a>
-
-        <span class="text-xs uppercase tracking-widest text-indigo-400 font-semibold">
-            Palabra Secreta
-        </span>
-
-    </header>
-
-
-    <!-- CONTENIDO -->
-    <main class="flex-grow px-4 py-6 max-w-4xl mx-auto w-full flex flex-col items-center">
-
-        <!-- TITULO -->
-        <div class="text-center mb-8">
-
-            <h1 class="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 bg-clip-text text-transparent">
-
-                🏆 RANKING GLOBAL
-
-            </h1>
-
-            <p class="text-slate-400 text-sm mt-2">
-                Los mejores jugadores de Palabra Secreta
-            </p>
-
-        </div>
-
-
-        <!-- TABLA -->
-        <div class="w-full bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-2xl overflow-hidden">
-
-            <div class="overflow-x-auto">
-
-                <table class="w-full text-left border-collapse">
-
-                    <thead>
-
-                        <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-900">
-
-                            <th class="py-3 px-4 sm:px-6">
-                                Pos
-                            </th>
-
-                            <th class="py-3 px-4 sm:px-6">
-                                Jugador
-                            </th>
-
-                            <th class="py-3 px-4 sm:px-6 text-center">
-                                Victorias
-                            </th>
-
-                            <th class="py-3 px-4 sm:px-6 text-center">
-                                Partidas
-                            </th>
-
-                            <th class="py-3 px-4 sm:px-6 text-right">
-                                Efectividad
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody id="leaderboard-body"
-                           class="divide-y divide-slate-800/50 text-sm">
-
-                        <tr>
-
-                            <td colspan="5"
-                                class="py-8 text-center text-slate-500">
-
-                                Cargando jugadores...
-
-                            </td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-
-        <!-- MENSAJE VACIO -->
-        <div id="empty-message"
-             class="hidden mt-6 text-center bg-slate-900 border border-slate-800 rounded-2xl p-8 w-full">
-
-            <div class="text-5xl mb-3">
-                🎮
-            </div>
-
-            <h2 class="text-xl font-bold">
-                Aún no hay jugadores
-            </h2>
-
-            <p class="text-slate-400 text-sm mt-2">
-                ¡Sé el primero en entrar al ranking!
-            </p>
-
-        </div>
-
-
-        <!-- ERROR -->
-        <div id="error-message"
-             class="hidden mt-6 text-center bg-red-950/30 border border-red-900 rounded-2xl p-6 w-full">
-
-            <div class="text-3xl mb-2">
-                ⚠️
-            </div>
-
-            <p class="text-red-300 font-bold">
-                No se pudo cargar el ranking
-            </p>
-
-            <p id="error-text"
-               class="text-red-400 text-xs mt-2">
-            </p>
-
-        </div>
-
-    </main>
-
-
-    <!-- FOOTER -->
-    <footer class="py-6 text-center text-xs text-slate-600">
-
-        By:
-        <span class="font-bold text-indigo-400">
-            Marcenaroc64
-        </span>
-
-    </footer>
-
-
-
-    <script type="module">
-
-        /* =========================================
-           FIREBASE
-           ========================================= */
-
-        import {
-            initializeApp
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-
-
-        import {
-            getFirestore,
-            collection,
-            getDocs,
-            doc,
-            getDoc
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-
-        /* =========================================
-           CONFIGURACION REAL DE FIREBASE
-           ========================================= */
-
-        const firebaseConfig = {
-
-            apiKey:
-                "AIzaSyC7hjuWiRx3uBdfKAS3mj9na6zqO6xtQUY",
-
-            authDomain:
-                "palabra-secre.firebaseapp.com",
-
-            projectId:
-                "palabra-secre",
-
-            storageBucket:
-                "palabra-secre.firebasestorage.app",
-
-            messagingSenderId:
-                "1057501011597",
-
-            appId:
-                "1:1057501011597:web:ab2dd815a8ad9a293cccc4"
-
-        };
-
-
-        /* =========================================
-           APP
-           ========================================= */
-
-        const app =
-            initializeApp(firebaseConfig);
-
-
-        const db =
-            getFirestore(app);
-
-
-       const appId = "palabra-secreta";
-
-
-        /* =========================================
-           ELEMENTOS
-           ========================================= */
-
-        const tbody =
-            document.getElementById(
-                "leaderboard-body"
-            );
-
-
-        const emptyMessage =
-            document.getElementById(
-                "empty-message"
-            );
-
-
-        const errorMessage =
-            document.getElementById(
-                "error-message"
-            );
-
-
-        const errorText =
-            document.getElementById(
-                "error-text"
-            );
-
-
-        /* =========================================
-           CARGAR RANKING
-           ========================================= */
-
-        async function loadRanking() {
-
-            try {
-
-                /*
-                =========================================
-                OBTENER TODOS LOS USUARIOS
-                =========================================
-
-                Ruta:
-
-                artifacts
-                    palabra-secreta
-                        users
-                            ID_USUARIO
-
-                */
-
-                const usersRef =
-                    collection(
-                        db,
-                        "artifacts",
-                        appId,
-                        "users"
-                    );
-
-
-                const usersSnapshot =
-                    await getDocs(
-                        usersRef
-                    );
-
-
-                const players =
-                    [];
-
-
-                /*
-                =========================================
-                RECORRER USUARIOS
-                =========================================
-                */
-
-                for (
-                    const userDoc
-                    of usersSnapshot.docs
-                ) {
-
-                    const userId =
-                        userDoc.id;
-
-
-                    /*
-                    =========================================
-                    ESTADISTICAS
-
-                    artifacts/appId/users/userId/
-                    gameData/stats
-                    =========================================
-                    */
-
-                    const statsRef =
-                        doc(
-                            db,
-                            "artifacts",
-                            appId,
-                            "users",
-                            userId,
-                            "gameData",
-                            "stats"
-                        );
-
-
-                    const statsSnap =
-                        await getDoc(
-                            statsRef
-                        );
-
-
-                    /*
-                    Si no hay estadísticas
-                    */
-
-                    if (
-                        !statsSnap.exists()
-                    ) {
-
-                        continue;
-
-                    }
-
-
-                    const data =
-                        statsSnap.data();
-
-
-                    /*
-                    =========================================
-                    DATOS
-                    =========================================
-                    */
-
-                    const won =
-                        Number(
-                            data.won || 0
-                        );
-
-
-                    const played =
-                        Number(
-                            data.played || 0
-                        );
-
-
-                    /*
-                    Si nunca jugó, no aparece
-                    */
-
-                    if (
-                        played <= 0
-                    ) {
-
-                        continue;
-
-                    }
-
-
-                    /*
-                    =========================================
-                    NOMBRE
-
-                    El documento principal del usuario
-                    podría contener información.
-
-                    Si no existe, mostramos una versión
-                    corta del ID.
-                    =========================================
-                    */
-
-                    const userData =
-                        userDoc.data();
-
-
-                    const name =
-
-                        userData.displayName ||
-
-                        userData.name ||
-
-                        data.displayName ||
-
-                        data.name ||
-
-                        "Jugador " +
-                        userId.substring(
-                            0,
-                            6
-                        );
-
-
-                    /*
-                    =========================================
-                    EFECTIVIDAD
-                    =========================================
-                    */
-
-                    const winRate =
-
-                        played > 0
-
-                        ?
-
-                        (
-                            won /
-                            played
-                        ) * 100
-
-                        :
-
-                        0;
-
-
-                    players.push({
-
-                        id:
-                            userId,
-
-                        name:
-                            name,
-
-                        won:
-                            won,
-
-                        played:
-                            played,
-
-                        winRate:
-                            winRate
-
-                    });
-
-                }
-
-
-                /*
-                =========================================
-                ORDENAR
-
-                Primero:
-                Mayor porcentaje
-
-                Después:
-                Más victorias
-                =========================================
-                */
-
-                players.sort(
-
-                    (
-                        a,
-                        b
-                    ) =>
-
-                        b.winRate -
-                        a.winRate
-
-                        ||
-
-                        b.won -
-                        a.won
-
-                );
-
-
-                /*
-                =========================================
-                SI NO HAY JUGADORES
-                =========================================
-                */
-
-                if (
-
-                    players.length === 0
-
-                ) {
-
-                    tbody.innerHTML =
-                        "";
-
-                    emptyMessage.classList.remove(
-                        "hidden"
-                    );
-
-
-                    return;
-
-                }
-
-
-                /*
-                =========================================
-                LIMPIAR TABLA
-                =========================================
-                */
-
-                tbody.innerHTML =
-                    "";
-
-
-                /*
-                =========================================
-                MOSTRAR JUGADORES
-                =========================================
-                */
-
-                players.forEach(
-
-                    (
-                        player,
-                        index
-                    ) => {
-
-
-                        const position =
-                            index + 1;
-
-
-                        /*
-                        =========================================
-                        MEDALLAS
-                        =========================================
-                        */
-
-                        let medal =
-
-                            "#" +
-                            position;
-
-
-                        if (
-                            position === 1
-                        ) {
-
-                            medal =
-                                "🥇";
-
-                        }
-
-
-                        if (
-                            position === 2
-                        ) {
-
-                            medal =
-                                "🥈";
-
-                        }
-
-
-                        if (
-                            position === 3
-                        ) {
-
-                            medal =
-                                "🥉";
-
-                        }
-
-
-                        /*
-                        =========================================
-                        FILA
-                        =========================================
-                        */
-
-                        const row =
-                            document.createElement(
-                                "tr"
-                            );
-
-
-                        row.className =
-                            "hover:bg-slate-900 transition-colors";
-
-
-                        row.innerHTML = `
-
-                            <td class="py-4 px-4 sm:px-6 font-bold">
-
-                                ${medal}
-
-                            </td>
-
-
-                            <td class="py-4 px-4 sm:px-6 font-semibold text-slate-200">
-
-                                ${escapeHtml(
-                                    String(
-                                        player.name
-                                    )
-                                )}
-
-                            </td>
-
-
-                            <td class="py-4 px-4 sm:px-6 text-center text-emerald-400 font-bold">
-
-                                ${player.won}
-
-                            </td>
-
-
-                            <td class="py-4 px-4 sm:px-6 text-center text-slate-300">
-
-                                ${player.played}
-
-                            </td>
-
-
-                            <td class="py-4 px-4 sm:px-6 text-right font-mono text-indigo-400">
-
-                                ${player.winRate.toFixed(
-                                    1
-                                )}%
-
-                            </td>
-
-                        `;
-
-
-                        tbody.appendChild(
-                            row
-                        );
-
-
-                    }
-
-                );
-
-
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7hjuWiRx3uBdfKAS3mj9na6zqO6xtQUY",
+        authDomain: "palabra-secre.firebaseapp.com",
+        projectId: "palabra-secre",
+        storageBucket: "palabra-secre.firebasestorage.app",
+        messagingSenderId: "1057501011597",
+        appId: "1:1057501011597:web:ab2dd815a8ad9a293cccc4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const appId = "palabra-secreta";
+
+    const tbody = document.getElementById("leaderboard-body");
+    const emptyMessage = document.getElementById("empty-message");
+    const errorMessage = document.getElementById("error-message");
+    const errorText = document.getElementById("error-text");
+
+    async function loadRanking() {
+        try {
+            const usersRef = collection(db, "artifacts", appId, "users");
+            const usersSnapshot = await getDocs(usersRef);
+            const players = [];
+
+            usersSnapshot.forEach((userDoc) => {
+                const data = userDoc.data();
+                const userId = userDoc.id;
+
+                const won = Number(data.won || 0);
+                const played = Number(data.played || 0);
+
+                if (played <= 0) return;
+
+                const name = data.displayName || data.name || "Jugador " + userId.substring(0, 6);
+                const winRate = played > 0 ? (won / played) * 100 : 0;
+
+                players.push({ id: userId, name, won, played, winRate });
+            });
+
+            players.sort((a, b) => b.winRate - a.winRate || b.won - a.won);
+
+            if (players.length === 0) {
+                tbody.innerHTML = "";
+                emptyMessage.classList.remove("hidden");
+                return;
             }
 
+            tbody.innerHTML = "";
 
-            catch (
-                error
-            ) {
+            players.forEach((player, index) => {
+                const position = index + 1;
+                let medal = "#" + position;
 
+                if (position === 1) medal = "🥇";
+                if (position === 2) medal = "🥈";
+                if (position === 3) medal = "🥉";
 
-                console.error(
-                    error
-                );
+                const row = document.createElement("tr");
+                row.className = "hover:bg-slate-900 transition-colors";
+                row.innerHTML = `
+                    <td class="py-4 px-4 sm:px-6 font-bold">${medal}</td>
+                    <td class="py-4 px-4 sm:px-6 font-semibold text-slate-200">${escapeHtml(String(player.name))}</td>
+                    <td class="py-4 px-4 sm:px-6 text-center text-emerald-400 font-bold">${player.won}</td>
+                    <td class="py-4 px-4 sm:px-6 text-center text-slate-300">${player.played}</td>
+                    <td class="py-4 px-4 sm:px-6 text-right font-mono text-indigo-400">${player.winRate.toFixed(1)}%</td>
+                `;
+                tbody.appendChild(row);
+            });
 
-
-                tbody.innerHTML =
-                    "";
-
-
-                errorMessage.classList.remove(
-                    "hidden"
-                );
-
-
-                errorText.textContent =
-                    error.message;
-
-
-            }
-
+        } catch (error) {
+            console.error(error);
+            tbody.innerHTML = "";
+            errorMessage.classList.remove("hidden");
+            errorText.textContent = error.message;
         }
+    }
 
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
 
-        /*
-        =========================================
-        SEGURIDAD HTML
-        =========================================
-        */
-
-        function escapeHtml(
-            text
-        ) {
-
-            return text
-
-                .replace(
-                    /&/g,
-                    "&amp;"
-                )
-
-                .replace(
-                    /</g,
-                    "&lt;"
-                )
-
-                .replace(
-                    />/g,
-                    "&gt;"
-                );
-
-        }
-
-
-        /*
-        =========================================
-        INICIAR
-        =========================================
-        */
-
-        loadRanking();
-
-
-    </script>
-
-</body>
-</html>
+    loadRanking();
+</script>
